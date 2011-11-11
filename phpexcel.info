@@ -1,0 +1,3 @@
+name = PHP Excel
+description = Provides a simple API for using the PHPExcel library
+core = 6.x

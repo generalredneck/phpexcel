@@ -1,0 +1,6 @@
+<?php
+
+/**
+ * Include phpexcel.api.inc in your module for exporting to excel.
+ * module_load_include('inc', 'phpexcel', 'phpexcel.api');
+ */
