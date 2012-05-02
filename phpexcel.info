@@ -1,3 +1,4 @@
-name = PHP Excel
+name = PHPExcel
 description = Provides a simple API for using the PHPExcel library
-core = 6.x
+core = 7.x
+
