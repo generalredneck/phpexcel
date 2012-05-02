@@ -35,7 +35,7 @@
  *            about errors.
  */
 function phpexcel_export($headers = array(), $data = array(), $path = '', $options = NULL) {
-  if (!count($headers)) {
+  if (!count($headers) && (!isset($options['ignore_headers']) || (isset($options['ignore_headers']) && !$options['ignore_headers']))) {
     watchdog('phpexcel', "You must provide at lease one header entry!", array(), WATCHDOG_ERROR);
 		
     return FALSE;
@@ -77,10 +77,23 @@ function phpexcel_export($headers = array(), $data = array(), $path = '', $optio
   
   PHPExcel_Settings::setCacheStorageMethod($cache_method, $cache_settings);
 	
-	$xls = new PHPExcel();
+	// Must we render from a template file ?
+	if (!empty($options['template'])) {
+		$xls_reader = PHPExcel_IOFactory::createReaderForFile($options['template']);
+		
+    $xls = $xls_reader->load($options['template']);
+	}
+	else {
+		$xls = new PHPExcel();
+	}
   
   _phpexcel_set_properties($xls->getProperties(), $options);
-  _phpexcel_set_headers($xls, $headers, $options);
+  
+	// Must we ignore the headers ?
+	if (empty($options['ignore_headers'])) {
+		_phpexcel_set_headers($xls, $headers, $options);
+	}
+	
   _phpexcel_set_columns($xls, $data, count(reset(array_values($headers))), $options);
   
   if (!isset($options['format']) || $options['format'] == 'xls') {
