@@ -18,8 +18,9 @@
  */
 function phpexcel_menu() {
   return array(
-    'admin/settings/phpexcel' => array(
+    'admin/config/system/phpexcel' => array(
       'title' => 'PHPExcel settings',
+      'description' => 'Manage PHPExcel settings.',
       'access arguments' => array('administer phpexcel'),
       'page callback' => 'drupal_get_form',
       'page arguments' => array('phpexcel_settings_form'),
