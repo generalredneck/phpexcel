@@ -47,7 +47,7 @@ function phpexcel_export($headers = array(), $data = array(), $path = '', $optio
     return FALSE;
   }
 	
-  if (!is_writable($path)) {
+  if (!(is_writable($path) || (!file_exists($path) && is_writable(dirname($path))))) {
     watchdog('phpexcel', "Path '@path' is not writable!", array('@path' => $path), WATCHDOG_ERROR);
 		
     return FALSE;
@@ -61,8 +61,8 @@ function phpexcel_export($headers = array(), $data = array(), $path = '', $optio
 	
   require_once 'sites/all/libraries/PHPExcel/PHPExcel.php';
 	
-	$path = file_munge_filename($path, 'xls xlsx');
-  
+	$path = phpexcel_munge_filename($path);
+	
 	// Can we use Memcache ?
 	$memcache = variable_get('phpexcel_memcache', '');
 	
@@ -338,4 +338,22 @@ function phpexcel_invoke($hook, $op, &$data, &$phpexcel, $options, $column = NUL
 		
 		$function($op, $data, $phpexcel, $options, $column, $row);
 	}
+}
+
+/**
+ * Munges the filename in the path.
+ * We can't use drupals file_munge_filename() directly because the $path variable
+ * contains the path as well.
+ * Separate the filename from the directory structure, munge it and return.
+ *
+ * @param string $path
+ *
+ * @return string
+ */
+function phpexcel_munge_filename($path) {
+	$parts = explode('/', $path);
+	
+	$filename = array_pop($parts);
+	
+	return implode('/', $parts) . '/' . file_munge_filename($filename, 'xls xlsx');
 }
