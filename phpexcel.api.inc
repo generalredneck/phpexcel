@@ -7,5 +7,3 @@
  */
 
 require_once 'phpexcel.inc';
-
-drupal_set_message(t("A module is including the phpexcel/phpexcel.api.inc file. This file is deprecated. Code should be updated to include the new phpexcel/phpexcel.inc file instead."), 'warning');
