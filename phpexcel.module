@@ -9,7 +9,7 @@
  * To use PHPExcel, include phpexcel.api.inc in your module for exporting to
  * excel:
  * @code
- *   module_load_include('inc', 'phpexcel', 'phpexcel.api');
+ *   module_load_include('inc', 'phpexcel', 'phpexcel');
  * @endcode
  */
 

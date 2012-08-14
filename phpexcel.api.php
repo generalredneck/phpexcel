@@ -1,3 +1,5 @@
+<?php
+
 /**
  * @file
  * Provide documentation to phpexcel hooks.

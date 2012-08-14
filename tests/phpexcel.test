@@ -29,7 +29,7 @@ class PHPExcelTest extends DrupalWebTestCase {
     // Make sure the directory is writable
     $this->assertTrue(is_writable($this->directory), t("The !dir directory exists and is writable.", array('!dir' => $this->directory)));
     
-    require_once dirname(__FILE__) . '/../phpexcel.api.inc';
+    require_once dirname(__FILE__) . '/../phpexcel.inc';
   }
   
   public function tearDown() {

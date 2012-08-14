@@ -1,18 +1,5 @@
 <?php
 
-function phpexcel_requirements() {
-  $requirements = array();
-
-  if ($phase == 'runtime') {
-    // Check for the PHP GD library.
-    if (!file_exists('sites/all/modules/PHPExcel/PHPExcel.php')) {
-      $requirements['phpexcel'] = array(
-        'value' => t("Library not found"), 
-        'severity' => REQUIREMENT_ERROR, 
-        'description' => t("In order to use PHPExcel, you must first download the entire library (1.7) at !link and put it under sites/all/libraries/PHPExcel/ (so you should have sites/all/libraries/PHPExcel/PHPExcel.php)", array('!link' => '<a href="http://www.phpexcel.net">phpexcel.net</a>')),
-      );
-    }
-  }
-
-  return $requirements;
+function phpexcel_install() {
+  drupal_set_message(t("In order to use PHPExcel, you must first download the entire library (1.7) at !link and put it under sites/all/libraries/PHPExcel/ (so you should have sites/all/libraries/PHPExcel/PHPExcel.php)", array('!link' => '<a href="http://www.phpexcel.net">phpexcel.net</a>')), 'warning');
 }
