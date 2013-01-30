@@ -1,6 +1,7 @@
 name = PHPExcel
 description = Provides a simple API for using the PHPExcel library
 core = 7.x
+dependencies[] = libraries
 
 files[] = tests/phpexcel.test
 

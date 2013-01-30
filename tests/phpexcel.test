@@ -52,7 +52,7 @@ class PHPExcelTest extends DrupalWebTestCase {
      */
     // Prepare the data
     $headers = array('Header 1', 'Header 2');
-    
+    $this->verbose('<pre>' . print_r(libraries_load('PHPExcel'), 1));
     $data = array(
       array('Data 1.1', 'Data 1.2'),
       array('Data 2.1', 'Data 2.2'),
@@ -69,10 +69,10 @@ class PHPExcelTest extends DrupalWebTestCase {
     $wrong_path = 'path/to/nowhere/file.xls';
     
     // Should fail
-    $this->assertFalse(phpexcel_export($headers, $data, $wrong_path), 'Passed an incorrect path');
+    $this->assertEqual(PHPEXCEL_ERROR_PATH_NOT_WRITABLE, phpexcel_export($headers, $data, $wrong_path), 'Passed an incorrect path');
     
     // Should pass
-    $this->assertTrue(phpexcel_export($headers, $data, $correct_path), t('Exported data to !path', array('!path' => $this->single_worksheet_file)));
+    $this->assertEqual(PHPEXCEL_SUCCESS, phpexcel_export($headers, $data, $correct_path), t('Exported data to !path', array('!path' => $this->single_worksheet_file)));
     
     // Should pass
     $this->assertTrue(filesize($this->single_worksheet_file) > 0, 'Filesize should be bigger than 0');
@@ -136,7 +136,7 @@ class PHPExcelTest extends DrupalWebTestCase {
     $this->multiple_worksheet_file = phpexcel_munge_filename($correct_path);
     
     // Should pass
-    $this->assertTrue(phpexcel_export($headers, $data, $correct_path), t('Exported data to !path', array('!path' => $this->multiple_worksheet_file)));
+    $this->assertEqual(PHPEXCEL_SUCCESS, phpexcel_export($headers, $data, $correct_path), t('Exported data to !path', array('!path' => $this->multiple_worksheet_file)));
     
     // Should pass
     $this->assertTrue(filesize($this->multiple_worksheet_file) > 0, 'Filesize should be bigger than 0');
@@ -197,7 +197,7 @@ class PHPExcelTest extends DrupalWebTestCase {
     $this->no_headers_file = phpexcel_munge_filename($correct_path);
     
     // Should pass
-    $this->assertTrue(phpexcel_export(NULL, $data, $correct_path, array('ignore_headers' => TRUE)), t('Exported data to !path', array('!path' => $this->no_headers_file)));
+    $this->assertEqual(PHPEXCEL_SUCCESS, phpexcel_export(NULL, $data, $correct_path, array('ignore_headers' => TRUE)), t('Exported data to !path', array('!path' => $this->no_headers_file)));
     
     // Should pass
     $this->assertTrue(filesize($this->no_headers_file) > 0, 'Filesize should be bigger than 0');
@@ -254,7 +254,7 @@ class PHPExcelTest extends DrupalWebTestCase {
     $this->template_file = phpexcel_munge_filename($correct_path);
     
     // Should pass
-    $this->assertTrue(phpexcel_export(array(), $data, $correct_path, $options), t('Exported data to !path', array('!path' => $this->template_file)));
+    $this->assertEqual(PHPEXCEL_SUCCESS, phpexcel_export(array(), $data, $correct_path, $options), t('Exported data to !path', array('!path' => $this->template_file)));
     
     // Should pass
     $this->assertTrue(filesize($this->template_file) > 0, 'Filesize should be bigger than 0');
@@ -313,7 +313,7 @@ class PHPExcelTest extends DrupalWebTestCase {
     );
     
     // Should pass
-    $this->assertTrue(phpexcel_export_db_result($result, $correct_path), t('Exported data to !path', array('!path' => $this->db_result_file)));
+    $this->assertEqual(PHPEXCEL_SUCCESS, phpexcel_export_db_result($result, $correct_path), t('Exported data to !path', array('!path' => $this->db_result_file)));
     
     // Should pass
     $this->assertTrue(filesize($this->db_result_file) > 0, 'Filesize should be bigger than 0');

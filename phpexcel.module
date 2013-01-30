@@ -9,7 +9,7 @@
  * To use PHPExcel, include phpexcel.api.inc in your module for exporting to
  * excel:
  * @code
- *   module_load_include('inc', 'phpexcel', 'phpexcel');
+ *   module_load_include('inc', 'phpexcel');
  * @endcode
  */
 
@@ -35,6 +35,25 @@ function phpexcel_permission() {
   return array(
     'administer phpexcel' => array(
       'title' => t('Administer the PHPExcel module settings'), 
+    ),
+  );
+}
+
+/**
+ * Implements hook_libraries_info().
+ */
+function phpexcel_libraries_info() {
+  return array(
+    'PHPExcel' => array(
+      'name' => 'PHPExcel',
+      'vendor url' => 'http://phpexcel.codeplex.com/',
+      'download url' => 'https://github.com/PHPOffice/PHPExcel',
+      'path' => 'Classes',
+      'files' => array(
+        'php' => array(
+          'PHPExcel.php',
+        ),
+      ),
     ),
   );
 }
