@@ -94,7 +94,7 @@ function phpexcel_export($headers = array(), $data = array(), $path = '', $optio
 		_phpexcel_set_headers($xls, $headers, $options);
 	}
 	
-  _phpexcel_set_columns($xls, $data, count(reset(array_values($headers))), $options);
+  _phpexcel_set_columns($xls, $data, count(reset($headers)), $options);
   
   if (!isset($options['format']) || $options['format'] == 'xls') {
 		$writer = new PHPExcel_Writer_Excel5($xls);
@@ -143,7 +143,7 @@ function phpexcel_export_db_result($result, $path, $options = array()) {
  *
  * @see phpexcel_export()
  */
-function _phpexcel_set_properties(&$properties, $options) {
+function _phpexcel_set_properties($properties, $options) {
   if (isset($options['creator'])) {
     $properties->setCreator($options['creator']);
   }
@@ -169,8 +169,8 @@ function _phpexcel_set_properties(&$properties, $options) {
  *
  * @see phpexcel_export()
  */
-function _phpexcel_set_headers(&$xls, &$headers, $options) {
-	if (!is_array(reset(array_values($headers)))) {
+function _phpexcel_set_headers($xls, &$headers, $options) {
+	if (!is_array(reset($headers))) {
 		$headers = array($headers);
 	}
 	
@@ -211,7 +211,7 @@ function _phpexcel_set_headers(&$xls, &$headers, $options) {
  *
  * @see phpexcel_export()
  */
-function _phpexcel_set_columns(&$xls, &$data, $cols, $options) {
+function _phpexcel_set_columns($xls, &$data, $cols, $options) {
 	$data = array_values($data);
 	
 	if (!is_array($data[0][0])) {
@@ -332,7 +332,7 @@ function phpexcel_import($path, $keyed_by_headers = TRUE) {
  * We need a custom hook-invoke method, because we need to pass parameters by
  * reference.
  */
-function phpexcel_invoke($hook, $op, &$data, &$phpexcel, $options, $column = NULL, $row = NULL) {
+function phpexcel_invoke($hook, $op, &$data, $phpexcel, $options, $column = NULL, $row = NULL) {
 	foreach(module_implements('phpexcel_' . $hook) as $module) {
 		$function = $module . '_phpexcel_' . $hook;
 		
