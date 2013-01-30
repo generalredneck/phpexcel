@@ -53,9 +53,10 @@ function phpexcel_libraries_info() {
         'pattern' => "/@version\s+([0-9\.]+)/",
         'lines' => 25,
       ),
+      'path' => 'Classes',
       'files' => array(
         'php' => array(
-          'Classes/PHPExcel.php',
+          'PHPExcel.php',
         ),
       ),
     ),
