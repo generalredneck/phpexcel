@@ -94,7 +94,7 @@ function phpexcel_export($headers = array(), $data = array(), $path = '', $optio
 		_phpexcel_set_headers($xls, $headers, $options);
 	}
 	
-  _phpexcel_set_columns($xls, $data, count(reset($headers)), $options);
+  _phpexcel_set_columns($xls, $data, empty($options['ignore_headers']) ? $headers : NULL, $options);
   
   if (!isset($options['format']) || $options['format'] == 'xls') {
 		$writer = new PHPExcel_Writer_Excel5($xls);
@@ -170,7 +170,7 @@ function _phpexcel_set_properties($properties, $options) {
  * @see phpexcel_export()
  */
 function _phpexcel_set_headers($xls, &$headers, $options) {
-	if (!is_array(reset($headers))) {
+	if (!is_array(reset(array_values($headers)))) {
 		$headers = array($headers);
 	}
 	
@@ -211,20 +211,26 @@ function _phpexcel_set_headers($xls, &$headers, $options) {
  *
  * @see phpexcel_export()
  */
-function _phpexcel_set_columns($xls, &$data, $cols, $options) {
-	$data = array_values($data);
-	
-	if (!is_array($data[0][0])) {
+function _phpexcel_set_columns($xls, &$data, $headers = NULL, $options = array()) {	
+	if (!is_array(reset(reset(array_values($data))))) {
 		$data = array($data);
 	}
 	
 	phpexcel_invoke('export', 'data', $data, $xls, $options);
 	
-	foreach ($data as $sheet_id => $sheet_data) {
+	$sheet_id = 0;
+	
+	foreach ($data as $sheet_name => $sheet_data) {
 		$sheet = $xls->setActiveSheetIndex($sheet_id);
+		$col_count = NULL; // Reset column count.
 	
 		for ($i = 0, $len = count($sheet_data); $i < $len; $i++) {
-			for ($j = 0; $j < $cols; $j++) {
+			// Set new column count.
+			if (!isset($col_count)) {
+				$col_count = isset($headers) ? count($headers[$sheet_name]) : count($sheet_data[$i]);
+			}
+
+			for ($j = 0; $j < $col_count; $j++) {
 				$value = isset($sheet_data[$i][$j]) ? $sheet_data[$i][$j] : '';
 				
 				// We must offset the row count (by 2, because PHPExcel starts the count at 1), because the first row is used by the headers
@@ -235,6 +241,8 @@ function _phpexcel_set_columns($xls, &$data, $cols, $options) {
 				phpexcel_invoke('export', 'post cell', $value, $sheet, $options, $j, $i + 2);
 			}
 		}
+
+		$sheet_id++;
 	}
 }
 
