@@ -221,7 +221,28 @@ function _phpexcel_set_columns($xls, &$data, $headers = NULL, $options = array()
 	$sheet_id = 0;
 	
 	foreach ($data as $sheet_name => $sheet_data) {
-		$sheet = $xls->setActiveSheetIndex($sheet_id);
+		// If the headers are not set, we haven't created any sheets yet.
+		// Create them now.
+		if (!isset($headers)) {
+			$offset = 1;
+			$xls->createSheet($sheet_id);
+		
+			phpexcel_invoke('export', 'new sheet', $sheet_id, $xls, $options);
+			
+			$sheet = $xls->setActiveSheetIndex($sheet_id);
+
+			if (!is_numeric($sheet_name)) {
+				$sheet->setTitle($sheet_name);
+			}
+			else {
+				$sheet->setTitle("Worksheet $sheet_id");
+			}
+		}
+		else {
+			$offset = 2;
+			$sheet = $xls->setActiveSheetIndex($sheet_id);
+		}
+
 		$col_count = NULL; // Reset column count.
 	
 		for ($i = 0, $len = count($sheet_data); $i < $len; $i++) {
@@ -234,11 +255,11 @@ function _phpexcel_set_columns($xls, &$data, $headers = NULL, $options = array()
 				$value = isset($sheet_data[$i][$j]) ? $sheet_data[$i][$j] : '';
 				
 				// We must offset the row count (by 2, because PHPExcel starts the count at 1), because the first row is used by the headers
-				phpexcel_invoke('export', 'pre cell', $value, $sheet, $options, $j, $i + 2);
+				phpexcel_invoke('export', 'pre cell', $value, $sheet, $options, $j, $i + $offset);
 				
-				$sheet->setCellValueByColumnAndRow($j, $i + 2, $value);
+				$sheet->setCellValueByColumnAndRow($j, $i + $offset, $value);
 				
-				phpexcel_invoke('export', 'post cell', $value, $sheet, $options, $j, $i + 2);
+				phpexcel_invoke('export', 'post cell', $value, $sheet, $options, $j, $i + $offset);
 			}
 		}
 
