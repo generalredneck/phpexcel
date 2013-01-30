@@ -1,0 +1,10 @@
+<?php
+
+/**
+ * @file
+ * Add a warning message to download the PHPExcel library before use.
+ */
+
+function phpexcel_enable() {
+  drupal_set_message(t("In order to use PHPExcel, you must first download the entire library (1.7) at !link and put it under sites/*/libraries/PHPExcel/ (so you should have sites/*/libraries/PHPExcel/Classes/PHPExcel.php)", array('!link' => '<a href="http://www.phpexcel.net">phpexcel.net</a>')), 'warning');
+}
