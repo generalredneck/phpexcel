@@ -293,7 +293,7 @@ function phpexcel_import($path, $keyed_by_headers = TRUE) {
 	if (is_readable($path)) {
 		$library = libraries_load('PHPExcel');
 
-		if (empty($library['loaded'])) {
+		if (!empty($library['loaded'])) {
 			$xls_reader = PHPExcel_IOFactory::createReaderForFile($path);
 			
 			$xls_reader->setReadDataOnly(TRUE);

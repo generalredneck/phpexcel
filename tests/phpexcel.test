@@ -23,7 +23,7 @@ class PHPExcelTest extends DrupalWebTestCase {
   }
   
   public function setUp() {
-    parent::setUp('phpexcel');
+    parent::setUp('libraries', 'phpexcel');
     
     $this->directory = variable_get('file_' . file_default_scheme() . '_path', conf_path() . '/files');
     
