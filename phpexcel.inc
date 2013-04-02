@@ -251,16 +251,9 @@ function _phpexcel_set_columns($xls, &$data, $headers = NULL, $options = array()
 			$offset = 2;
 			$sheet = $xls->setActiveSheetIndex($sheet_id);
 		}
-
-		$col_count = NULL; // Reset column count.
 	
 		for ($i = 0, $len = count($sheet_data); $i < $len; $i++) {
-			// Set new column count.
-			if (!isset($col_count)) {
-				$col_count = isset($headers) ? count($headers[$sheet_name]) : count($sheet_data[$i]);
-			}
-
-			for ($j = 0; $j < $col_count; $j++) {
+			for ($j = 0; $j < count($sheet_data[$i]); $j++) {
 				$value = isset($sheet_data[$i][$j]) ? $sheet_data[$i][$j] : '';
 				
 				// We must offset the row count (by 2, because PHPExcel starts the count at 1), because the first row is used by the headers
