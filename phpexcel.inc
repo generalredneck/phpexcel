@@ -185,7 +185,7 @@ function _phpexcel_set_headers($xls, &$headers, $options) {
 	
 	phpexcel_invoke('export', 'headers', $headers, $xls, $options);
 	
-	$sheet_id = 0;
+	$sheet_id = 1;
 	
 	foreach ($headers as $sheet_name => $sheet_headers) {
 		$xls->createSheet($sheet_id);
@@ -227,7 +227,7 @@ function _phpexcel_set_columns($xls, &$data, $headers = NULL, $options = array()
 	
 	phpexcel_invoke('export', 'data', $data, $xls, $options);
 	
-	$sheet_id = 0;
+	$sheet_id = 1;
 	
 	foreach ($data as $sheet_name => $sheet_data) {
 		// If the headers are not set, we haven't created any sheets yet.
