@@ -223,20 +223,24 @@ function _phpexcel_set_headers($xls, &$headers, $options) {
 	phpexcel_invoke('export', 'headers', $headers, $xls, $options);
 	
 	$sheet_id = 0;
-	
 	foreach ($headers as $sheet_name => $sheet_headers) {
-		$xls->createSheet($sheet_id);
+    if ($sheet_id) {
+      $xls->createSheet($sheet_id);
+      $sheet = $xls->setActiveSheetIndex($sheet_id);
+    }
+    else {
+      // PHPExcel always creates one sheet.
+      $sheet = $xls->getSheet();
+    }
+
+    if (!is_numeric($sheet_name)) {
+      $sheet->setTitle($sheet_name);
+    }
+    else {
+      $sheet->setTitle(t("Worksheet !id", array('!id' => ($sheet_id + 1))));
+    }
 		
 		phpexcel_invoke('export', 'new sheet', $sheet_id, $xls, $options);
-		
-		$sheet = $xls->setActiveSheetIndex($sheet_id);
-
-		if (!is_numeric($sheet_name)) {
-			$sheet->setTitle($sheet_name);
-		}
-		else {
-			$sheet->setTitle("Worksheet $sheet_id");
-		}
 
 		for ($i = 0, $len = count($sheet_headers); $i < $len; $i++) {
 			$value = trim($sheet_headers[$i]);
@@ -265,24 +269,28 @@ function _phpexcel_set_columns($xls, &$data, $headers = NULL, $options = array()
 	phpexcel_invoke('export', 'data', $data, $xls, $options);
 	
 	$sheet_id = 0;
-	
 	foreach ($data as $sheet_name => $sheet_data) {
 		// If the headers are not set, we haven't created any sheets yet.
 		// Create them now.
 		if (!isset($headers)) {
 			$offset = 1;
-			$xls->createSheet($sheet_id);
-		
-			phpexcel_invoke('export', 'new sheet', $sheet_id, $xls, $options);
-			
-			$sheet = $xls->setActiveSheetIndex($sheet_id);
+      if ($sheet_id) {
+			  $xls->createSheet($sheet_id);
+        $sheet = $xls->setActiveSheetIndex($sheet_id);
+      }
+      else {
+        // PHPExcel always creates one sheet.
+        $sheet = $xls->getSheet();
+      }
 
 			if (!is_numeric($sheet_name)) {
 				$sheet->setTitle($sheet_name);
 			}
 			else {
-				$sheet->setTitle("Worksheet $sheet_id");
+				$sheet->setTitle(t("Worksheet !id", array('!id' => ($sheet_id + 1))));
 			}
+
+      phpexcel_invoke('export', 'new sheet', $sheet_id, $xls, $options);
 		}
 		else {
 			$offset = 2;
