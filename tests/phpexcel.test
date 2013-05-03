@@ -52,7 +52,7 @@ class PHPExcelTest extends DrupalWebTestCase {
      */
     // Prepare the data
     $headers = array('Header 1', 'Header 2');
-    $this->verbose('<pre>' . print_r(libraries_load('PHPExcel'), 1));
+
     $data = array(
       array('Data 1.1', 'Data 1.2'),
       array('Data 2.1', 'Data 2.2'),
@@ -82,17 +82,17 @@ class PHPExcelTest extends DrupalWebTestCase {
      * Import, not keyed by headers
      */
     $data = phpexcel_import($this->single_worksheet_file, FALSE);
-    
+
     // Should pass
     $this->assertTrue(!!$data, 'Import succeeded');
     
     // Should have 4 rows (3 rows + headers)
     $count = !empty($data[0]) ? count($data[0]) : 0;
-    $this->assertTrue($count === 4, t('!count rows', array('!count' => $count)));
+    $this->assertTrue($count === 4, t('!count rows, expect 4.', array('!count' => $count)));
     
     // Should only have 2 cells
     $count = !empty($data[0][0]) ? count($data[0][0]) : 0;
-    $this->assertTrue($count === 2, t('!count cells', array('!count' => $count)));
+    $this->assertTrue($count === 2, t('!count cells, expect 2.', array('!count' => $count)));
     
     // First row, 1st cell should be 'Header 1'
     $header = !empty($data[0][0][0]) ? $data[0][0][0] : 'no';
@@ -146,17 +146,17 @@ class PHPExcelTest extends DrupalWebTestCase {
      * Import, keyed by headers
      */
     $data = phpexcel_import($this->multiple_worksheet_file);
-    
+
     // Should pass
     $this->assertTrue(!!$data, 'Import succeeded');
     
     // Should have 3 rows
     $count = !empty($data[0]) ? count($data[0]) : 0;
-    $this->assertTrue($count === 3, t('!count rows', array('!count' => $count)));
+    $this->assertTrue($count === 3, t('!count rows, expect 3', array('!count' => $count)));
     
     // Should only have 2 cells
     $count = !empty($data[0][0]) ? count($data[0][0]) : 0;
-    $this->assertTrue($count === 2, t('!count cells', array('!count' => $count)));
+    $this->assertTrue($count === 2, t('!count cells, expect 2', array('!count' => $count)));
     
     // Should be keyed by headers
     $this->assertTrue(isset($data[0][0]['Header 1.1']), 'Keyed by header ("Header 1.1")');
@@ -213,11 +213,11 @@ class PHPExcelTest extends DrupalWebTestCase {
     
     // Should have 3 rows
     $count = !empty($data[0]) ? count($data[0]) : 0;
-    $this->assertTrue($count === 3, t('!count rows', array('!count' => $count)));
+    $this->assertTrue($count === 3, t('!count rows, expect 3', array('!count' => $count)));
     
     // Should only have 2 cells
     $count = !empty($data[0][0]) ? count($data[0][0]) : 0;
-    $this->assertTrue($count === 2, t('!count cells', array('!count' => $count)));
+    $this->assertTrue($count === 2, t('!count cells, expect 2', array('!count' => $count)));
     
     $header = !empty($data[0][0][0]) ? $data[0][0][0] : 'no';
     $this->assertTrue($header === 'Data 1.1.1', 'Should be "Data 1.1.1"');
@@ -263,13 +263,13 @@ class PHPExcelTest extends DrupalWebTestCase {
      * Import and check.
      */
     $data = phpexcel_import($this->template_file, FALSE);
-    
+
     // Should pass
     $this->assertTrue(!!$data, 'Import succeeded');
     
     // Should have 3 rows (3 rows and no headers)
     $count = !empty($data[0]) ? count($data[0]) : 0;
-    $this->assertTrue($count === 3, t('!count rows', array('!count' => $count)));
+    $this->assertTrue($count === 3, t('!count rows, expect 3', array('!count' => $count)));
     
     // First row, 1st cell should be 'Data 1.1'
     $header = !empty($data[0][0][0]) ? $data[0][0][0] : 'no';
@@ -323,17 +323,17 @@ class PHPExcelTest extends DrupalWebTestCase {
      * Import, cells keyed by headers.
      */
     $data = phpexcel_import($this->db_result_file);
-    
+
     // Should pass
     $this->assertTrue(!!$data, 'Import succeeded');
     
     // Should have 10 rows
     $count = count($data[0]);
-    $this->assertTrue($count === 10, t('!count rows', array('!count' => $count)));
+    $this->assertTrue($count === 10, t('!count rows, expect 10', array('!count' => $count)));
     
     // Should only have 2 cells
     $count = count($data[0][0]);
-    $this->assertTrue($count === 2, t('!count cells', array('!count' => $count)));
+    $this->assertTrue($count === 2, t('!count cells, expect 2', array('!count' => $count)));
     
     // Should be keyed by headers (nid & title)
     $this->assertTrue(isset($data[0][0]['nid']), 'Keyed by header (nid)');
