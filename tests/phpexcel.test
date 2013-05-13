@@ -8,6 +8,7 @@
 class PHPExcelTest extends DrupalWebTestCase {
   
   protected $single_worksheet_file;
+  protected $issue_1988868_file;
   protected $multiple_worksheet_file;
   protected $no_headers_file;
   protected $db_result_file;
@@ -35,6 +36,7 @@ class PHPExcelTest extends DrupalWebTestCase {
   
   public function tearDown() {
     @unlink($this->single_worksheet_file);
+    @unlink($this->issue_1988868_file);
     @unlink($this->multiple_worksheet_file);
     @unlink($this->no_headers_file);
     @unlink($this->db_result_file);
@@ -101,6 +103,66 @@ class PHPExcelTest extends DrupalWebTestCase {
     // Second row, 1st cell should be 'Data 1.1'
     $header = !empty($data[0][1][0]) ? $data[0][1][0] : 'no';
     $this->assertTrue($header === 'Data 1.1', 'Second row, 1st cell data should be "Data 1.1"');
+  }
+
+  /**
+   * A cell with a value of '0' must get exported as such.
+   *
+   * @see http://drupal.org/node/1988868
+   */
+  public function testIssue1988868() {
+    /**
+     * Export
+     */
+    // Prepare the data
+    $headers = array('Header 1', 'Header 2');
+
+    $data = array(
+      array('0', 'Data 1.2'),
+      array('Data 2.1', '0'),
+      array('0', '0')
+    );
+
+    // Create a file path
+    $correct_path = file_create_filename('phpexcel_test1.xls', $this->directory);
+
+    // The filename will be munged by the export function, so:
+    $this->issue_1988868_file = phpexcel_munge_filename($correct_path);
+
+    // Should pass
+    $this->assertEqual(PHPEXCEL_SUCCESS, phpexcel_export($headers, $data, $correct_path), t('Exported data to !path', array('!path' => $this->issue_1988868_file)));
+
+    // Should pass
+    $this->assertTrue(filesize($this->issue_1988868_file) > 0, 'Filesize should be bigger than 0');
+
+    /**
+     * Import and check.
+     * Import, not keyed by headers
+     */
+    $data = phpexcel_import($this->issue_1988868_file, FALSE);
+
+    // Should pass
+    $this->assertTrue(!!$data, 'Import succeeded');
+
+    // Second row, 1st cell should be 'Data 1.1'
+    $cell = $data[0][1][0];
+    $this->assertTrue($cell === '0', 'Second row, 1st cell data should be "0"');
+
+    // Second row, 2nd cell should be 'Data 1.1'
+    $cell = $data[0][1][1];
+    $this->assertTrue($cell === 'Data 1.2', 'Second row, 2nd cell data should be "Data 1.2"');
+
+    // Third row, 2nd cell should be '0'
+    $cell = $data[0][2][1];
+    $this->assertTrue($cell === '0', 'Third row, 2nd cell data should be "0"');
+
+    // Fourth row, 1st cell should be '0'
+    $cell = $data[0][3][0];
+    $this->assertTrue($cell === '0', 'Fourth row, 1st cell data should be "0"');
+
+    // Fourth row, 2nd cell should be '0'
+    $cell = $data[0][3][1];
+    $this->assertTrue($cell === '0', 'Fourth row, 2nd cell data should be "0"');
   }
   
   /**

@@ -358,17 +358,18 @@ function phpexcel_import($path, $keyed_by_headers = TRUE) {
 					
 					$cells->setIterateOnlyExistingCells(FALSE);
 					
-					foreach($cells as $cell) {					
+					foreach($cells as $cell) {
+            $value = $cell->getValue();
+            $value = strlen($value) ? trim($value) : '';
+
 						if (!$j && $keyed_by_headers) {
-							$value = $cell->getValue() ? trim($cell->getValue()) : $k;
+              $value = strlen($value) ? $value : $k;
 							
 							phpexcel_invoke('import', 'pre cell', $value, $cell, array('keyed_by_headers' => $keyed_by_headers), $k, $j);
 							
 							$headers[$i][] = $value;
 						}
 						elseif ($keyed_by_headers) {
-							$value = $cell->getValue() ? $cell->getValue() : '';
-							
 							phpexcel_invoke('import', 'pre cell', $value, $cell, array('keyed_by_headers' => $keyed_by_headers), $k, $j);
 							
 							$data[$i][$j - 1][$headers[$i][$k]] = $value;
@@ -376,8 +377,6 @@ function phpexcel_import($path, $keyed_by_headers = TRUE) {
 							phpexcel_invoke('import', 'post cell', $data[$i][$j - 1][$headers[$i][$k]], $cell, array('keyed_by_headers' => $keyed_by_headers), $k, $j);
 						}
 						else {
-							$value = $cell->getValue() ? $cell->getValue() : '';
-							
 							phpexcel_invoke('import', 'pre cell', $value, $cell, array('keyed_by_headers' => $keyed_by_headers), $k, $j);
 							
 							$data[$i][$j][] = $value;
