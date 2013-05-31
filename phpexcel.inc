@@ -324,10 +324,12 @@ function _phpexcel_set_columns($xls, &$data, $headers = NULL, $options = array()
  * 						If TRUE, will key the row array with the header values and will
  * 						skip the header row. If FALSE, will contain the headers in the first
  * 						row and the rows will be keyed numerically.
+ * @param boolean $keyed_by_worksheet = FALSE
+ * 						If TRUE, will key the data array with the worksheet names. Otherwise, it will use a numerical key.
  * @return array|PHPEXCEL_ERROR_LIBRARY_NOT_FOUND|PHPEXCEL_ERROR_FILE_NOT_READABLE
  * 						The parsed data as an array on success, PHPEXCEL_ERROR_LIBRARY_NOT_FOUND or PHPEXCEL_ERROR_FILE_NOT_READABLE on error.
  */
-function phpexcel_import($path, $keyed_by_headers = TRUE) {
+function phpexcel_import($path, $keyed_by_headers = TRUE, $keyed_by_worksheet = FALSE) {
 	if (is_readable($path)) {
 		$library = libraries_load('PHPExcel');
 
@@ -340,7 +342,7 @@ function phpexcel_import($path, $keyed_by_headers = TRUE) {
 			
 			$data = array();
 			$headers = array();
-			$i = 0;
+      $i = 0;
 			
 			phpexcel_invoke('import', 'full', $xls_data, $xls_reader, array('keyed_by_headers' => $keyed_by_headers));
 			
@@ -350,6 +352,9 @@ function phpexcel_import($path, $keyed_by_headers = TRUE) {
 				phpexcel_invoke('import', 'sheet', $worksheet, $xls_reader, array('keyed_by_headers' => $keyed_by_headers));
 				
 				foreach ($worksheet->getRowIterator() as $row) {
+          if ($keyed_by_worksheet) {
+            $i = $worksheet->getTitle();
+          }
 					$k = 0;
 					
 					phpexcel_invoke('import', 'row', $row, $xls_reader, array('keyed_by_headers' => $keyed_by_headers));
@@ -389,8 +394,10 @@ function phpexcel_import($path, $keyed_by_headers = TRUE) {
 					
 					$j++;
 				}
-				
-				$i++;
+
+        if (!$keyed_by_worksheet) {
+				  $i++;
+        }
 			}
 			
 			return $data;
