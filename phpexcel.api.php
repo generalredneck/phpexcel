@@ -3,11 +3,11 @@
 /**
  * @file
  * Provide documentation to phpexcel hooks.
- * 
+ *
  * phpexcel provides several hooks which can allow a developer to have more
  * control over the export or import.
  */
- 
+
 /**
  * Export
  *
@@ -34,20 +34,20 @@ function hook_phpexcel_export($op, &$data, $phpexcel, $options, $column = NULL, 
        * The $data parameter will contain the headers in array form. The headers
        * have not been added to the document yet and can be altered at this
        * point.
-       * 
+       *
        * The $phpexcel parameter will contain the PHPExcel object.
        */
       break;
-    
+
     case 'new sheet':
-       /**
+      /**
        * The $data parameter will contain the sheet ID. This is a new sheet and
        * can be altered.
-       * 
+       *
        * The $phpexcel parameter will contain the PHPExcel_Worksheet object.
        */
       break;
-      
+
     case 'data':
       /**
        * The $data parameter contains all the data to be exported as a
@@ -57,7 +57,7 @@ function hook_phpexcel_export($op, &$data, $phpexcel, $options, $column = NULL, 
        * The $phpexcel parameter contains the PHPExcel object
        */
       break;
-    
+
     case 'pre cell':
       /**
        * The $data parameter contains the call value to be rendered. The value
@@ -68,7 +68,7 @@ function hook_phpexcel_export($op, &$data, $phpexcel, $options, $column = NULL, 
        * The $column and $row parameters are set.
        */
       break;
-    
+
     case 'post cell':
       /**
        * The $data parameter contains the call value that was rendered. This
@@ -108,43 +108,43 @@ function hook_phpexcel_import($op, &$data, $phpexcel, $options, $column = NULL, 
       /**
        * The $data parameter will contain the fully loaded Excel file, returned
        * by the PHPExcel_Reader object.
-       * 
+       *
        * The $phpexcel parameter will contain the PHPExcel_Reader object.
        */
       break;
-    
+
     case 'sheet':
       /**
        * The $data parameter will contain the current PHPExcel_Worksheet.
-       * 
+       *
        * The $phpexcel parameter will contain the PHPExcel_Reader object.
        */
       break;
-    
+
     case 'row':
       /**
        * The $data parameter will contain the current PHPExcel_Row.
-       * 
+       *
        * The $phpexcel parameter will contain the PHPExcel_Reader object.
        */
       break;
-    
+
     case 'pre cell':
       /**
        * The $data parameter will contain the current cell value. The value has
        * not been added to the data array and can still be altered.
-       * 
+       *
        * The $phpexcel parameter will contain the PHPExcel_Cell object.
        *
        * The $column and $row parameters are set.
        */
       break;
-    
+
     case 'post cell':
       /**
        * The $data parameter will contain the current cell value inside the data
        * array. The value can be altered.
-       * 
+       *
        * The $phpexcel parameter will contain the PHPExcel_Cell object.
        *
        * The $column and $row parameters are set.

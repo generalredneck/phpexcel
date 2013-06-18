@@ -14,7 +14,7 @@
  */
 
 /**
- * Implements hook_menu()
+ * Implements hook_menu().
  */
 function phpexcel_menu() {
   return array(
@@ -29,12 +29,12 @@ function phpexcel_menu() {
 }
 
 /**
- * Implements hook_permission()
+ * Implements hook_permission().
  */
 function phpexcel_permission() {
   return array(
     'administer phpexcel' => array(
-      'title' => t('Administer the PHPExcel module settings'), 
+      'title' => t('Administer the PHPExcel module settings'),
     ),
   );
 }
@@ -138,7 +138,7 @@ function phpexcel_settings_form() {
     '#type' => 'textfield',
     '#default_value' => variable_get('phpexcel_memcache_cachetime', '600'),
   );
-  
+
   return system_settings_form($form);
 }
 
@@ -149,13 +149,19 @@ function phpexcel_settings_form_validate($form, $form_state) {
   switch ($form_state['values']['phpexcel_cache_mechanism']) {
     case 'cache_to_phpTemp':
       if (!preg_match('/^[0-9]+$/', $form_state['values']['phpexcel_phptemp_limit'])) {
-        form_set_error('phpexcel_phptemp_limit', t("You must provide an integer value. The unit is in megabytes. Defaults to 1 (recommended)."));
+        form_set_error(
+          'phpexcel_phptemp_limit',
+          t("You must provide an integer value. The unit is in megabytes. Defaults to 1 (recommended).")
+        );
       }
       break;
 
     case 'cache_to_apc':
       if (!preg_match('/^[0-9]+$/', $form_state['values']['phpexcel_apc_cachetime'])) {
-        form_set_error('phpexcel_apc_cachetime', t("You must provide an integer value. The unit is in seconds. Defaults to 600 (recommended). Remember that all cells cached in APC will get cleared at the end of the script run."));
+        form_set_error(
+          'phpexcel_apc_cachetime',
+          t("You must provide an integer value. The unit is in seconds. Defaults to 600 (recommended). Remember that all cells cached in APC will get cleared at the end of the script run.")
+        );
       }
       break;
 
@@ -167,7 +173,10 @@ function phpexcel_settings_form_validate($form, $form_state) {
         form_set_error('phpexcel_memcache_port', t("You must provide a port for Memcache. Defaults to '11211'."));
       }
       if (!preg_match('/^[0-9]+$/', $form_state['values']['phpexcel_memcache_cachetime'])) {
-        form_set_error('phpexcel_memcache_cachetime', t("You must provide an integer value. The unit is in seconds. Defaults to 600 (recommended). Remember that all cells cached in Memcache will get cleared at the end of the script run."));
+        form_set_error(
+          'phpexcel_memcache_cachetime',
+          t("You must provide an integer value. The unit is in seconds. Defaults to 600 (recommended). Remember that all cells cached in Memcache will get cleared at the end of the script run.")
+        );
       }
       break;
   }
