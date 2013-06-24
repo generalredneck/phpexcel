@@ -464,6 +464,66 @@ class PHPExcelTest extends DrupalWebTestCase {
     $this->assertTrue(isset($data[0][1]['title']), 'Keyed by header (title)');
   }
 
+  /**
+   * Test the ability to pass cutom methods and arguments on import to the Reader.
+   */
+  public function testCustomMethodCalls() {
+    /**
+     * Export
+     */
+    // Prepare data
+    $headers = array(
+      'Sheet 1' => array('Header 1.1', 'Header 1.2'),
+      'Sheet 2' => array('Header 2.1', 'Header 2.2')
+    );
+
+    $data = array(
+      'Sheet 1' => array(
+        array('Data 1.1.1', 'Data 1.1.2'),
+        array('Data 1.2.1', 'Data 1.2.2'),
+        array('Data 1.3.1', 'Data 1.3.2')
+      ),
+      'Sheet 2' => array(
+        array('Data 2.1.1', 'Data 2.1.2'),
+        array('Data 2.2.1', 'Data 2.2.2'),
+        array('Data 2.3.1', 'Data 2.3.2')
+      ),
+    );
+
+    // Create a file path
+    $correct_path = file_create_filename('phpexcel_test2.xls', $this->directory);
+
+    // The filename will be munged by the export function, so:
+    $this->multiple_worksheet_file = phpexcel_munge_filename($correct_path);
+
+    // Should pass
+    $this->assertEqual(
+      PHPEXCEL_SUCCESS,
+      phpexcel_export($headers, $data, $correct_path),
+      t('Exported data to !path', array('!path' => $this->multiple_worksheet_file))
+    );
+
+    // Should pass
+    $this->assertTrue(filesize($this->multiple_worksheet_file) > 0, 'Filesize should be bigger than 0');
+
+    /**
+     * Import and check.
+     * Pass a method call to only import a specific worksheet.
+     */
+    $data = phpexcel_import($this->multiple_worksheet_file, TRUE, TRUE, array('setLoadSheetsOnly' => array('Sheet 1')));
+
+    // Should pass
+    $this->assertTrue(!!$data, 'Import succeeded');
+
+    // Should have 3 rows
+    $count = !empty($data['Sheet 1']) ? count($data['Sheet 1']) : 0;
+    $this->assertTrue($count === 3, t('!count rows, expect 3', array('!count' => $count)));
+
+    // Should be empty.
+    $count = !empty($data['Sheet 2']) ? count($data['Sheet 2']) : 0;
+    $this->assertTrue($count === 0, t('!count rows, expect 0', array('!count' => $count)));
+  }
+
 
   protected function _createNode() {
     $node = (object) array(

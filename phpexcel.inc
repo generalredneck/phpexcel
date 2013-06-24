@@ -331,6 +331,9 @@ function _phpexcel_set_columns($xls, &$data, $headers = NULL, $options = array()
  * Simple API function that will load an Excel file from $path and parse it
  * as a multidimensional array.
  *
+ * @todo API Cleanup. This is getting out of hand as multiple feature requests come in. Only one,
+ * optional, parameter array ? Similar to core theme functions ?
+ *
  * @param string $path
  *            The path to the Excel file. Must be readable.
  * @param boolean $keyed_by_headers = TRUE
@@ -339,10 +342,12 @@ function _phpexcel_set_columns($xls, &$data, $headers = NULL, $options = array()
  *            row and the rows will be keyed numerically.
  * @param boolean $keyed_by_worksheet = FALSE
  *            If TRUE, will key the data array with the worksheet names. Otherwise, it will use a numerical key.
+ * @param array $custom_calls = NULL
+ *            An associative array of methods and arguments to call on the PHPExcel Reader object.
  * @return array|PHPEXCEL_ERROR_LIBRARY_NOT_FOUND|PHPEXCEL_ERROR_FILE_NOT_READABLE
  *            The parsed data as an array on success, PHPEXCEL_ERROR_LIBRARY_NOT_FOUND or PHPEXCEL_ERROR_FILE_NOT_READABLE on error.
  */
-function phpexcel_import($path, $keyed_by_headers = TRUE, $keyed_by_worksheet = FALSE) {
+function phpexcel_import($path, $keyed_by_headers = TRUE, $keyed_by_worksheet = FALSE, $custom_calls = NULL) {
   if (is_readable($path)) {
     $library = libraries_load('PHPExcel');
 
@@ -350,6 +355,14 @@ function phpexcel_import($path, $keyed_by_headers = TRUE, $keyed_by_worksheet = 
       $xls_reader = PHPExcel_IOFactory::createReaderForFile($path);
 
       $xls_reader->setReadDataOnly(TRUE);
+
+      if (!empty($custom_calls)) {
+        foreach ($custom_calls as $method => $args) {
+          if (method_exists($xls_reader, $method)) {
+            call_user_func_array(array($xls_reader, $method), $args);
+          }
+        }
+      }
 
       $xls_data = $xls_reader->load($path);
 
