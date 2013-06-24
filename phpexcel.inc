@@ -229,7 +229,7 @@ function _phpexcel_set_properties($properties, $options) {
  * @see phpexcel_export()
  */
 function _phpexcel_set_headers($xls, &$headers, $options) {
-  if (!is_array(reset(array_values($headers)))) {
+  if (!is_array(current(array_values($headers)))) { // Prior to PHP 5.3, calling current() on an associative array would not work. Get only array values, just in case.
     $headers = array($headers);
   }
 
@@ -275,7 +275,7 @@ function _phpexcel_set_headers($xls, &$headers, $options) {
  * @see phpexcel_export()
  */
 function _phpexcel_set_columns($xls, &$data, $headers = NULL, $options = array()) {
-  if (!is_array(reset(reset(array_values($data))))) {
+  if (!is_array(current(current(array_values($data))))) { // Prior to PHP 5.3, calling current() on an associative array would not work. Get only array values, just in case.
     $data = array($data);
   }
 
