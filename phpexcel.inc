@@ -121,7 +121,7 @@ function phpexcel_export($headers = array(), $data = array(), $path = '', $optio
       break;
 
     case 'cache_to_sqlite3':
-      $cache_method = PHPExcel_CachedObjectStorageFactory::cache_to_memcache;
+      $cache_method = PHPExcel_CachedObjectStorageFactory::cache_to_sqlite3;
       break;
 
     default:
