@@ -172,6 +172,7 @@ function phpexcel_export($headers = array(), $data = array(), $path = '', $optio
   }
 
   $writer->save($path);
+  unset($writer);
 
   return file_exists($path) ? PHPEXCEL_SUCCESS : PHPEXCEL_ERROR_FILE_NOT_WRITTEN;
 }
@@ -474,6 +475,10 @@ function phpexcel_import($path, $keyed_by_headers = TRUE, $keyed_by_worksheet = 
           $i++;
         }
       }
+
+      // Free up memory.
+      $xls_data->disconnectWorksheets();
+      unset($xls_data);
 
       return $data;
     }
