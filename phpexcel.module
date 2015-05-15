@@ -4,10 +4,7 @@
  * @file
  * The module file.
  *
- * Defines the settings callback and form for phpexcel.
- *
- * To use PHPExcel, include phpexcel.api.inc in your module for exporting to
- * excel:
+ * To use PHPExcel, include phpexcel.inc in your module:
  * @code
  *   module_load_include('inc', 'phpexcel');
  * @endcode

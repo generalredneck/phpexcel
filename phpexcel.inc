@@ -19,30 +19,30 @@ define('PHPEXCEL_SUCCESS', 10);
  * save it in $path.
  *
  * @param array $headers
- *            An array containing all headers. If given a two-dimensional array,
- *            each first dimension entry will be on a separate worksheet
- *            ($headers[sheet][header]).
+ *    An array containing all headers. If given a two-dimensional array,
+ *    each first dimension entry will be on a separate worksheet
+ *    ($headers[sheet][header]).
  * @param array $data
- *            A two-dimensional array containing all data ($data[row][column]).
- *            If given a three-dimensional array, each first dimension
- *            entry will be on a separate worksheet ($data[sheet][row][column]).
+ *    A two-dimensional array containing all data ($data[row][column]).
+ *    If given a three-dimensional array, each first dimension
+ *    entry will be on a separate worksheet ($data[sheet][row][column]).
  * @param string $path
- *            The path where the file must be saved. Must be writable.
+ *    The path where the file must be saved. Must be writable.
  * @param array $options
- *            An array which allows to set some specific options.
- *            Used keys:
- *                [format] = The EXCEL format. Can be either 'xls' or 'xlsx'
- *                [creator] = The name of the creator
- *                [title] = The title
- *                [subject] = The subject
- *                [description] = The description
- *            The options array will always be passed to all the hooks. If
- *            developers need specific information for their own hooks, they
- *            can add any data to this array.
+ *    An array which allows to set some specific options.
+ *    Used keys:
+ *    - format: The EXCEL format. Can be either 'xls' or 'xlsx'
+ *    - creator: The name of the creator
+ *    - title: The title
+ *    - subject: The subject
+ *    - description: The description
+ *    The options array will always be passed to all the hooks. If
+ *    developers need specific information for their own hooks, they
+ *    can add any data to this array.
  * @return PHPEXCEL_SUCCESS|PHPEXCEL_ERROR_NO_HEADERS|PHPEXCEL_ERROR_NO_DATA|PHPEXCEL_ERROR_PATH_NOT_WRITABLE|PHPEXCEL_ERROR_LIBRARY_NOT_FOUND
- *            PHPEXCEL_SUCCESS on success, PHPEXCEL_ERROR_NO_HEADERS, PHPEXCEL_ERROR_NO_DATA, PHPEXCEL_ERROR_PATH_NOT_WRITABLE or
- *            PHPEXCEL_ERROR_LIBRARY_NOT_FOUND on error. Look in watchdog logs for information
- *            about errors.
+ *    PHPEXCEL_SUCCESS on success, PHPEXCEL_ERROR_NO_HEADERS, PHPEXCEL_ERROR_NO_DATA, PHPEXCEL_ERROR_PATH_NOT_WRITABLE or
+ *    PHPEXCEL_ERROR_LIBRARY_NOT_FOUND on error. Look in watchdog logs for information
+ *    about errors.
  */
 function phpexcel_export($headers = array(), $data = array(), $path = '', $options = NULL) {
   if (!count(
@@ -178,21 +178,23 @@ function phpexcel_export($headers = array(), $data = array(), $path = '', $optio
 }
 
 /**
- * Simple API function which allows to export a db_query() result to an Excel file.
- * The headers will be set to the names of the exported columns.
+ * Export a database result to an Excel file.
+ *
+ * Simple API function which allows to export a db_query() result to an Excel
+ * file. The headers will be set to the names of the exported columns.
  *
  * @see phpexcel_export()
  *
  * @param result $result
- *              The MySQL result object.
+ *    The database result object.
  * @param string $path
- *              The path where the file should be saved. Must be writable.
+ *    The path where the file should be saved. Must be writable.
  * @param array $options
- *              An array which allows to set some specific options.
+ *    An array which allows to set some specific options.
  *
  * @return bool
- *              TRUE on success, FALSE on error. Look into watchdog logs for information
- *              about errors.
+ *    TRUE on success, FALSE on error. Look into watchdog logs for information
+ *    about errors.
  */
 function phpexcel_export_db_result($result, $path, $options = array()) {
   $data = array();
@@ -239,7 +241,9 @@ function _phpexcel_set_properties($properties, $options) {
  * @see phpexcel_export()
  */
 function _phpexcel_set_headers($xls, &$headers, $options) {
-  if (!is_array(current(array_values($headers)))) { // Prior to PHP 5.3, calling current() on an associative array would not work. Get only array values, just in case.
+  // Prior to PHP 5.3, calling current() on an associative array would not work.
+  // Get only array values, just in case.
+  if (!is_array(current(array_values($headers)))) {
     $headers = array($headers);
   }
 
@@ -285,7 +289,9 @@ function _phpexcel_set_headers($xls, &$headers, $options) {
  * @see phpexcel_export()
  */
 function _phpexcel_set_columns($xls, &$data, $headers = NULL, $options = array()) {
-  if (!is_array(current(current(array_values($data))))) { // Prior to PHP 5.3, calling current() on an associative array would not work. Get only array values, just in case.
+  // Prior to PHP 5.3, calling current() on an associative array would not work.
+  // Get only array values, just in case.
+  if (!is_array(current(current(array_values($data))))) {
     $data = array($data);
   }
 
@@ -324,7 +330,8 @@ function _phpexcel_set_columns($xls, &$data, $headers = NULL, $options = array()
       for ($j = 0; $j < count($sheet_data[$i]); $j++) {
         $value = isset($sheet_data[$i][$j]) ? $sheet_data[$i][$j] : '';
 
-        // We must offset the row count (by 2, because PHPExcel starts the count at 1), because the first row is used by the headers
+        // We must offset the row count (by 2, because PHPExcel starts the count
+        // at 1), because the first row is used by the headers.
         phpexcel_invoke('export', 'pre cell', $value, $sheet, $options, $j, $i + $offset);
 
         $sheet->setCellValueByColumnAndRow($j, $i + $offset, $value);
@@ -338,24 +345,26 @@ function _phpexcel_set_columns($xls, &$data, $headers = NULL, $options = array()
 }
 
 /**
+ * Import an Excel file.
+ *
  * Simple API function that will load an Excel file from $path and parse it
  * as a multidimensional array.
  *
- * @todo API Cleanup. This is getting out of hand as multiple feature requests come in. Only one,
- * optional, parameter array ? Similar to core theme functions ?
- *
  * @param string $path
- *            The path to the Excel file. Must be readable.
+ *    The path to the Excel file. Must be readable.
  * @param boolean $keyed_by_headers = TRUE
- *            If TRUE, will key the row array with the header values and will
- *            skip the header row. If FALSE, will contain the headers in the first
- *            row and the rows will be keyed numerically.
+ *    If TRUE, will key the row array with the header values and will
+ *    skip the header row. If FALSE, will contain the headers in the first
+ *    row and the rows will be keyed numerically.
  * @param boolean $keyed_by_worksheet = FALSE
- *            If TRUE, will key the data array with the worksheet names. Otherwise, it will use a numerical key.
+ *    If TRUE, will key the data array with the worksheet names. Otherwise, it
+ *    will use a numerical key.
  * @param array $custom_calls = NULL
- *            An associative array of methods and arguments to call on the PHPExcel Reader object.
+ *    An associative array of methods and arguments to call on the PHPExcel
+ *    Reader object.
  * @return array|PHPEXCEL_ERROR_LIBRARY_NOT_FOUND|PHPEXCEL_ERROR_FILE_NOT_READABLE
- *            The parsed data as an array on success, PHPEXCEL_ERROR_LIBRARY_NOT_FOUND or PHPEXCEL_ERROR_FILE_NOT_READABLE on error.
+ *    The parsed data as an array on success, PHPEXCEL_ERROR_LIBRARY_NOT_FOUND
+ *    or PHPEXCEL_ERROR_FILE_NOT_READABLE on error.
  */
 function phpexcel_import($path, $keyed_by_headers = TRUE, $keyed_by_worksheet = FALSE, $custom_calls = NULL) {
   if (is_readable($path)) {
@@ -496,7 +505,8 @@ function phpexcel_import($path, $keyed_by_headers = TRUE, $keyed_by_worksheet = 
 }
 
 /**
- * Invokes phpexcel hooks
+ * Invokes phpexcel hooks.
+ *
  * We need a custom hook-invoke method, because we need to pass parameters by
  * reference.
  */
@@ -510,6 +520,7 @@ function phpexcel_invoke($hook, $op, &$data, $phpexcel, $options, $column = NULL
 
 /**
  * Munges the filename in the path.
+ *
  * We can't use drupals file_munge_filename() directly because the $path variable
  * contains the path as well.
  * Separate the filename from the directory structure, munge it and return.

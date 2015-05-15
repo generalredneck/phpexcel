@@ -6,6 +6,22 @@
  */
 
 /**
+ * Implements hook_uninstall().
+ */
+function phpexcel_uninstall() {
+  foreach (array(
+    'phpexcel_cache_mechanism',
+    'phpexcel_phptemp_limit',
+    'phpexcel_apc_cachetime',
+    'phpexcel_memcache_host',
+    'phpexcel_memcache_port',
+    'phpexcel_memcache_cachetime',
+  ) as $variable) {
+    variable_del($variable);
+  }
+}
+
+/**
  * Implements hook_requirements().
  */
 function phpexcel_requirements($phase) {
