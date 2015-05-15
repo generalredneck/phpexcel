@@ -277,6 +277,9 @@ class PHPExcelTest extends DrupalWebTestCase {
     // Import, not keyed by headers.
     $data = phpexcel_import($actual_path, FALSE);
 
+    // Debug data.
+    $this->verbose(print_r($data, 1));
+
     $this->assertTrue(!!$data, 'Import succeeded');
 
     // Should have 3 rows.
@@ -288,10 +291,10 @@ class PHPExcelTest extends DrupalWebTestCase {
     $this->assertTrue($count === 2, t('!count cells, expect 2', array('!count' => $count)));
 
     $header = !empty($data[0][0][0]) ? $data[0][0][0] : 'no';
-    $this->assertTrue($header === 'Data 1.1.1', 'Should be "Data 1.1.1"');
+    $this->assertTrue($header === 'Data 1.1.1', t('!data, Should be "Data 1.1.1"', array('!data' => $header)));
 
     $header = !empty($data[1][1][1]) ? $data[1][1][1] : 'no';
-    $this->assertTrue($header === 'Data 2.2.2', 'Should be "Data 2.2.2"');
+    $this->assertTrue($header === 'Data 2.2.2', t('Should be "Data 2.2.2"', array('!data' => $header)));
   }
 
   /**
@@ -328,6 +331,9 @@ class PHPExcelTest extends DrupalWebTestCase {
 
     // Import and check.
     $data = phpexcel_import($actual_path, FALSE);
+
+    // Debug data.
+    $this->verbose(print_r($data, 1));
 
     $this->assertTrue(!!$data, 'Import succeeded');
 

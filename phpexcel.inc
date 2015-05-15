@@ -45,10 +45,7 @@ define('PHPEXCEL_SUCCESS', 10);
  *    about errors.
  */
 function phpexcel_export($headers = array(), $data = array(), $path = '', $options = NULL) {
-  if (!count(
-      $headers
-    ) && (!isset($options['ignore_headers']) || (isset($options['ignore_headers']) && !$options['ignore_headers']))
-  ) {
+  if (empty($headers) && empty($options['ignore_headers'])) {
     watchdog(
       'phpexcel',
       "No header was provided, and the 'ignore_headers' option was not set to TRUE. Excel export aborted.",
@@ -58,6 +55,9 @@ function phpexcel_export($headers = array(), $data = array(), $path = '', $optio
 
     return PHPEXCEL_ERROR_NO_HEADERS;
   }
+
+  // Make sure we have an ignore_headers key to prevent Notices.
+  $options['ignore_headers'] = isset($options['ignore_headers']) ? $options['ignore_headers'] : empty($headers);
 
   if (!count($data)) {
     watchdog('phpexcel', "No data was provided. Excel export aborted.", array(), WATCHDOG_ERROR);
@@ -136,8 +136,12 @@ function phpexcel_export($headers = array(), $data = array(), $path = '', $optio
 
   PHPExcel_Settings::setCacheStorageMethod($cache_method, $cache_settings);
 
-  // Must we render from a template file ?
-  if (!empty($options['template'])) {
+  // First, see if the file already exists
+  if (file_exists($path)) {
+    $xls = PHPExcel_IOFactory::load($path);
+  }
+  elseif (!empty($options['template'])) {
+    // Must we render from a template file ?
     $xls_reader = PHPExcel_IOFactory::createReaderForFile($options['template']);
 
     $xls = $xls_reader->load($options['template']);
@@ -302,7 +306,6 @@ function _phpexcel_set_columns($xls, &$data, $headers = NULL, $options = array()
     // If the headers are not set, we haven't created any sheets yet.
     // Create them now.
     if (!isset($headers)) {
-      $offset = 1;
       if ($sheet_id) {
         $xls->createSheet($sheet_id);
         $sheet = $xls->setActiveSheetIndex($sheet_id);
@@ -322,16 +325,20 @@ function _phpexcel_set_columns($xls, &$data, $headers = NULL, $options = array()
       phpexcel_invoke('export', 'new sheet', $sheet_id, $xls, $options);
     }
     else {
-      $offset = 2;
       $sheet = $xls->setActiveSheetIndex($sheet_id);
     }
+
+    // Get the highest row of the sheet to calculate the offset so that rows are
+    // simply appended rather than overwritten if the file is built in multiple
+    // passes.
+    $offset = $sheet->getHighestRow() + ($options['ignore_headers'] ? 0 : 1);
 
     for ($i = 0, $len = count($sheet_data); $i < $len; $i++) {
       for ($j = 0; $j < count($sheet_data[$i]); $j++) {
         $value = isset($sheet_data[$i][$j]) ? $sheet_data[$i][$j] : '';
 
-        // We must offset the row count (by 2, because PHPExcel starts the count
-        // at 1), because the first row is used by the headers.
+        // We must offset the row count (by 2 if the first row is used by the
+        // headers, because PHPExcel starts the count at 1, not 0).
         phpexcel_invoke('export', 'pre cell', $value, $sheet, $options, $j, $i + $offset);
 
         $sheet->setCellValueByColumnAndRow($j, $i + $offset, $value);
