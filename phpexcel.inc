@@ -368,7 +368,13 @@ function _phpexcel_set_columns($xls, &$data, $headers = NULL, $options = array()
  *    will use a numerical key.
  * @param array $custom_calls = NULL
  *    An associative array of methods and arguments to call on the PHPExcel
- *    Reader object.
+ *    Reader object. For example, if you wish to load only a specific worksheet
+ *    to save time, you could use:
+ *    @code
+ *    phpexcel_import('path/to/file.xls', TRUE, TRUE, array(
+ *      'setLoadSheetsOnly' => array('My sheet'),
+ *    ));
+ *    @endcode
  * @return array|PHPEXCEL_ERROR_LIBRARY_NOT_FOUND|PHPEXCEL_ERROR_FILE_NOT_READABLE
  *    The parsed data as an array on success, PHPEXCEL_ERROR_LIBRARY_NOT_FOUND
  *    or PHPEXCEL_ERROR_FILE_NOT_READABLE on error.
