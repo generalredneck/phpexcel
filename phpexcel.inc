@@ -159,9 +159,9 @@ function phpexcel_export($headers = array(), $data = array(), $path = '', $optio
 
   _phpexcel_set_columns($xls, $data, empty($options['ignore_headers']) ? $headers : NULL, $options);
 
-  $format = isset($options['format']) ? strtolower($options['format']) : 'xls';
+  $format = isset($options['format']) ? drupal_strtolower($options['format']) : 'xls';
 
-  switch($format) {
+  switch ($format) {
     case 'xlsx':
       $writer = new PHPExcel_Writer_Excel2007($xls);
       break;
