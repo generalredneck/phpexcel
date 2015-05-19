@@ -159,7 +159,7 @@ function phpexcel_export($headers = array(), $data = array(), $path = '', $optio
 
   _phpexcel_set_columns($xls, $data, empty($options['ignore_headers']) ? $headers : NULL, $options);
 
-  $format = isset($options['format']) ? drupal_strtolower($options['format']) : 'xls';
+  $format = isset($options['format']) ? drupal_strtolower($options['format']) : @end(explode('.', $path));
 
   switch ($format) {
     case 'xlsx':
@@ -400,14 +400,20 @@ function phpexcel_import($path, $keyed_by_headers = TRUE, $keyed_by_worksheet = 
 
       $data = array();
       $headers = array();
+      $options = array(
+        'path' => $path,
+        'keyed_by_headers' => $keyed_by_headers,
+        'keyed_by_worksheet' => $keyed_by_worksheet,
+        'custom_calls' => $custom_calls,
+      );
       $i = 0;
 
-      phpexcel_invoke('import', 'full', $xls_data, $xls_reader, array('keyed_by_headers' => $keyed_by_headers));
+      phpexcel_invoke('import', 'full', $xls_data, $xls_reader, $options);
 
       foreach ($xls_data->getWorksheetIterator() as $worksheet) {
         $j = 0;
 
-        phpexcel_invoke('import', 'sheet', $worksheet, $xls_reader, array('keyed_by_headers' => $keyed_by_headers));
+        phpexcel_invoke('import', 'sheet', $worksheet, $xls_reader, $options);
 
         foreach ($worksheet->getRowIterator() as $row) {
           if ($keyed_by_worksheet) {
@@ -415,7 +421,7 @@ function phpexcel_import($path, $keyed_by_headers = TRUE, $keyed_by_worksheet = 
           }
           $k = 0;
 
-          phpexcel_invoke('import', 'row', $row, $xls_reader, array('keyed_by_headers' => $keyed_by_headers));
+          phpexcel_invoke('import', 'row', $row, $xls_reader, $options);
 
           $cells = $row->getCellIterator();
 
@@ -433,7 +439,7 @@ function phpexcel_import($path, $keyed_by_headers = TRUE, $keyed_by_worksheet = 
                 'pre cell',
                 $value,
                 $cell,
-                array('keyed_by_headers' => $keyed_by_headers),
+                $options,
                 $k,
                 $j
               );
@@ -446,7 +452,7 @@ function phpexcel_import($path, $keyed_by_headers = TRUE, $keyed_by_worksheet = 
                 'pre cell',
                 $value,
                 $cell,
-                array('keyed_by_headers' => $keyed_by_headers),
+                $options,
                 $k,
                 $j
               );
@@ -458,7 +464,7 @@ function phpexcel_import($path, $keyed_by_headers = TRUE, $keyed_by_worksheet = 
                 'post cell',
                 $data[$i][$j - 1][$headers[$i][$k]],
                 $cell,
-                array('keyed_by_headers' => $keyed_by_headers),
+                $options,
                 $k,
                 $j
               );
@@ -474,7 +480,7 @@ function phpexcel_import($path, $keyed_by_headers = TRUE, $keyed_by_worksheet = 
                 'pre cell',
                 $value,
                 $cell,
-                array('keyed_by_headers' => $keyed_by_headers),
+                $options,
                 $colIdx,
                 $j
               );
@@ -486,7 +492,7 @@ function phpexcel_import($path, $keyed_by_headers = TRUE, $keyed_by_worksheet = 
                 'post cell',
                 $data[$i][$j][$colIdx],
                 $cell,
-                array('keyed_by_headers' => $keyed_by_headers),
+                $options,
                 $colIdx,
                 $j
               );
