@@ -413,7 +413,7 @@ function phpexcel_import($path, $keyed_by_headers = TRUE, $keyed_by_worksheet = 
 
           $cells = $row->getCellIterator();
 
-          $cells->setIterateOnlyExistingCells(FALSE);
+          $cells->setIterateOnlyExistingCells(TRUE);
 
           foreach ($cells as $cell) {
             $value = $cell->getValue();
@@ -458,25 +458,30 @@ function phpexcel_import($path, $keyed_by_headers = TRUE, $keyed_by_worksheet = 
               );
             }
             else {
+              $colIdx = $k;
+              if ($cells->getIterateOnlyExistingCells()) {
+                $colIdx = PHPExcel_Cell::columnIndexFromString($cell->getColumn()) - 1;
+              }
+
               phpexcel_invoke(
                 'import',
                 'pre cell',
                 $value,
                 $cell,
                 array('keyed_by_headers' => $keyed_by_headers),
-                $k,
+                $colIdx,
                 $j
               );
 
-              $data[$i][$j][] = $value;
+              $data[$i][$j][$colIdx] = $value;
 
               phpexcel_invoke(
                 'import',
                 'post cell',
-                $data[$i][$j][$k],
+                $data[$i][$j][$colIdx],
                 $cell,
                 array('keyed_by_headers' => $keyed_by_headers),
-                $k,
+                $colIdx,
                 $j
               );
             }
