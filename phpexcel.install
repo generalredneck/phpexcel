@@ -49,4 +49,5 @@ function phpexcel_requirements($phase) {
       );
     }
   }
+  return array();
 }
