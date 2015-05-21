@@ -31,18 +31,25 @@ define('PHPEXCEL_SUCCESS', 10);
  * @param array $options
  *    An array which allows to set some specific options.
  *    Used keys:
- *    - format: The EXCEL format. Can be either 'xls' or 'xlsx'
- *    - creator: The name of the creator
- *    - title: The title
- *    - subject: The subject
- *    - description: The description
+ *    - ignore_headers: whether the $headers parameter should be ignored or
+ *      not. Defaults to false.
+ *    - format: The EXCEL format. Can be either 'xls', 'xlsx', 'csv', or 'ods'.
+ *      Defaults to the extension given in the $path parameter, or 'xls'.
+ *    - creator: The name of the creator.
+ *    - title: The title.
+ *    - subject: The subject.
+ *    - description: The description.
+ *    - template: A path to a file to use as a template.
  *    The options array will always be passed to all the hooks. If
  *    developers need specific information for their own hooks, they
  *    can add any data to this array.
- * @return PHPEXCEL_SUCCESS|PHPEXCEL_ERROR_NO_HEADERS|PHPEXCEL_ERROR_NO_DATA|PHPEXCEL_ERROR_PATH_NOT_WRITABLE|PHPEXCEL_ERROR_LIBRARY_NOT_FOUND
- *    PHPEXCEL_SUCCESS on success, PHPEXCEL_ERROR_NO_HEADERS, PHPEXCEL_ERROR_NO_DATA, PHPEXCEL_ERROR_PATH_NOT_WRITABLE or
- *    PHPEXCEL_ERROR_LIBRARY_NOT_FOUND on error. Look in watchdog logs for information
- *    about errors.
+ *
+ * @return int
+ *    PHPEXCEL_SUCCESS on success, PHPEXCEL_ERROR_NO_HEADERS,
+ *    PHPEXCEL_ERROR_NO_DATA, PHPEXCEL_ERROR_PATH_NOT_WRITABLE or
+ *    PHPEXCEL_ERROR_LIBRARY_NOT_FOUND on error.
+ *
+ * @ingroup phpexcel_api
  */
 function phpexcel_export($headers = array(), $data = array(), $path = '', $options = NULL) {
   if (empty($headers) && empty($options['ignore_headers'])) {
@@ -375,9 +382,11 @@ function _phpexcel_set_columns($xls, &$data, $headers = NULL, $options = array()
  *      'setLoadSheetsOnly' => array('My sheet'),
  *    ));
  *    @endcode
- * @return array|PHPEXCEL_ERROR_LIBRARY_NOT_FOUND|PHPEXCEL_ERROR_FILE_NOT_READABLE
+ * @return array|int
  *    The parsed data as an array on success, PHPEXCEL_ERROR_LIBRARY_NOT_FOUND
  *    or PHPEXCEL_ERROR_FILE_NOT_READABLE on error.
+ *
+ * @ingroup phpexcel_api
  */
 function phpexcel_import($path, $keyed_by_headers = TRUE, $keyed_by_worksheet = FALSE, $custom_calls = NULL) {
   if (is_readable($path)) {
