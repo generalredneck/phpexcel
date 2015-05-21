@@ -94,47 +94,7 @@ function phpexcel_export($headers = array(), $data = array(), $path = '', $optio
   $path = phpexcel_munge_filename($path);
 
   // Determine caching method.
-  $cache_settings = array();
-  switch (variable_get('phpexcel_cache_mechanism')) {
-    case 'cache_in_memory_serialized':
-      $cache_method = PHPExcel_CachedObjectStorageFactory::cache_in_memory_serialized;
-      break;
-
-    case 'cache_in_memory_gzip':
-      $cache_method = PHPExcel_CachedObjectStorageFactory::cache_in_memory_gzip;
-      break;
-
-    case 'cache_to_phpTemp':
-      $cache_method = PHPExcel_CachedObjectStorageFactory::cache_to_phpTemp;
-      $cache_settings = array(
-        'memoryCacheSize' => variable_get('phpexcel_phptemp_limit', 1) . 'MB'
-      );
-      break;
-
-    case 'cache_to_apc':
-      $cache_method = PHPExcel_CachedObjectStorageFactory::cache_to_apc;
-      $cache_settings = array(
-        'cacheTime' => variable_get('phpexcel_apc_cachetime', '600')
-      );
-      break;
-
-    case 'cache_to_memcache':
-      $cache_method = PHPExcel_CachedObjectStorageFactory::cache_to_memcache;
-      $cache_settings = array(
-        'memcacheServer' => variable_get('phpexcel_memcache_host', 'localhost'),
-        'memcachePort' => variable_get('phpexcel_memcache_port', '11211'),
-        'cacheTime' => variable_get('phpexcel_memcache_cachetime', '600')
-      );
-      break;
-
-    case 'cache_to_sqlite3':
-      $cache_method = PHPExcel_CachedObjectStorageFactory::cache_to_sqlite3;
-      break;
-
-    default:
-      $cache_method = PHPExcel_CachedObjectStorageFactory::cache_in_memory;
-      break;
-  }
+  list($cache_method, $cache_settings) = _phpexcel_get_cache_settings();
 
   // Is it available ? If not, return an error.
   if (empty($cache_method)) {
@@ -393,6 +353,16 @@ function phpexcel_import($path, $keyed_by_headers = TRUE, $keyed_by_worksheet = 
     $library = libraries_load('PHPExcel');
 
     if (!empty($library['loaded'])) {
+      // Determine caching method.
+      list($cache_method, $cache_settings) = _phpexcel_get_cache_settings();
+
+      // Is it available ? If not, return an error.
+      if (empty($cache_method)) {
+        return PHPEXCEL_CACHING_METHOD_UNAVAILABLE;
+      }
+
+      PHPExcel_Settings::setCacheStorageMethod($cache_method, $cache_settings);
+
       $xls_reader = PHPExcel_IOFactory::createReaderForFile($path);
 
       $xls_reader->setReadDataOnly(TRUE);
@@ -568,4 +538,59 @@ function phpexcel_munge_filename($path) {
   $filename = array_pop($parts);
 
   return implode('/', $parts) . '/' . file_munge_filename($filename, 'xls xlsx');
+}
+
+/**
+ * Determine the cache settings.
+ *
+ * Based on the site configuration, return the correct cache settings and method
+ * to be used by PHPExcel.
+ *
+ * @return array
+ *    The first key is the caching method, the second the settings.
+ */
+function _phpexcel_get_cache_settings() {
+  $cache_settings = array();
+  switch (variable_get('phpexcel_cache_mechanism')) {
+    case 'cache_in_memory_serialized':
+      $cache_method = PHPExcel_CachedObjectStorageFactory::cache_in_memory_serialized;
+      break;
+
+    case 'cache_in_memory_gzip':
+      $cache_method = PHPExcel_CachedObjectStorageFactory::cache_in_memory_gzip;
+      break;
+
+    case 'cache_to_phpTemp':
+      $cache_method = PHPExcel_CachedObjectStorageFactory::cache_to_phpTemp;
+      $cache_settings = array(
+        'memoryCacheSize' => variable_get('phpexcel_phptemp_limit', 1) . 'MB'
+      );
+      break;
+
+    case 'cache_to_apc':
+      $cache_method = PHPExcel_CachedObjectStorageFactory::cache_to_apc;
+      $cache_settings = array(
+        'cacheTime' => variable_get('phpexcel_apc_cachetime', '600')
+      );
+      break;
+
+    case 'cache_to_memcache':
+      $cache_method = PHPExcel_CachedObjectStorageFactory::cache_to_memcache;
+      $cache_settings = array(
+        'memcacheServer' => variable_get('phpexcel_memcache_host', 'localhost'),
+        'memcachePort' => variable_get('phpexcel_memcache_port', '11211'),
+        'cacheTime' => variable_get('phpexcel_memcache_cachetime', '600')
+      );
+      break;
+
+    case 'cache_to_sqlite3':
+      $cache_method = PHPExcel_CachedObjectStorageFactory::cache_to_sqlite3;
+      break;
+
+    default:
+      $cache_method = PHPExcel_CachedObjectStorageFactory::cache_in_memory;
+      break;
+  }
+
+  return array($cache_method, $cache_settings);
 }
