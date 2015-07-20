@@ -33,8 +33,10 @@ class PHPExcelTest extends DrupalWebTestCase {
   }
 
   public function tearDown() {
-    foreach ($this->test_files as $file) {
-      @unlink($file);
+    if (!empty($this->test_files)) {
+      foreach ($this->test_files as $file) {
+        @unlink($file);
+      }
     }
 
     parent::tearDown();
@@ -132,11 +134,11 @@ class PHPExcelTest extends DrupalWebTestCase {
 
     $this->assertTrue(!!$data, 'Import succeeded');
 
-    // Second row, 1st cell should be 'Data 1.1'.
+    // Second row, 1st cell should be '0'.
     $cell = $data[0][1][0];
     $this->assertTrue($cell === '0', 'Second row, 1st cell data should be "0"');
 
-    // Second row, 2nd cell should be 'Data 1.1'.
+    // Second row, 2nd cell should be 'Data 1.2'.
     $cell = $data[0][1][1];
     $this->assertTrue($cell === 'Data 1.2', 'Second row, 2nd cell data should be "Data 1.2"');
 
@@ -151,6 +153,43 @@ class PHPExcelTest extends DrupalWebTestCase {
     // Fourth row, 2nd cell should be '0'.
     $cell = $data[0][3][1];
     $this->assertTrue($cell === '0', 'Fourth row, 2nd cell data should be "0"');
+  }
+
+  /**
+   * Empty cells must be imported as empty strings, and not shift adjacent
+   * cells to the left.
+   *
+   * @see http://drupal.org/node/2501147
+   */
+  public function testIssue2501147() {
+    // Import.
+    $data = phpexcel_import(dirname(__FILE__) . '/data/phpexcel.test.empty_cells.xlsx', FALSE);
+
+    $this->assertTrue(!!$data, 'Import succeeded');
+
+    // Second row, 1st cell should be 'Data 1.1'.
+    $cell = $data[0][1][0];
+    $this->assertTrue($cell === 'Data 1.1', 'Second row, 1st cell data should be "Data 1.1"');
+
+    // Second row, 2nd cell should be 'Data 1.2'.
+    $cell = $data[0][1][1];
+    $this->assertTrue($cell === 'Data 1.2', 'Second row, 2nd cell data should be "Data 1.2"');
+
+    // Third row, 1st cell should be ''.
+    $cell = $data[0][2][0];
+    $this->assertTrue($cell === '', 'Third row, 2nd cell data should be "" (empty string)');
+
+    // Third row, 2nd cell should be 'Data 2.2'.
+    $cell = $data[0][2][1];
+    $this->assertTrue($cell === 'Data 2.2', 'Second row, 2nd cell data should be "Data 2.2"');
+
+    // Fourth row, 1st cell should be 'Data 3.1'.
+    $cell = $data[0][3][0];
+    $this->assertTrue($cell === 'Data 3.1', 'Fourth row, 1st cell data should be "Data 3.1"');
+
+    // Fourth row, 2nd cell should be ''.
+    $cell = $data[0][3][1];
+    $this->assertTrue($cell === '', 'Fourth row, 2nd cell data should be "" (empty string)');
   }
 
   /**
