@@ -348,7 +348,7 @@ function _phpexcel_set_columns($xls, &$data, $headers = NULL, $options = array()
  *
  * @ingroup phpexcel_api
  */
-function phpexcel_import($path, $keyed_by_headers = TRUE, $keyed_by_worksheet = FALSE, $custom_calls = NULL) {
+function phpexcel_import($path, $keyed_by_headers = TRUE, $keyed_by_worksheet = FALSE, $custom_calls = array()) {
   if (is_readable($path)) {
     $library = libraries_load('PHPExcel');
 
@@ -365,7 +365,9 @@ function phpexcel_import($path, $keyed_by_headers = TRUE, $keyed_by_worksheet = 
 
       $xls_reader = PHPExcel_IOFactory::createReaderForFile($path);
 
-      $xls_reader->setReadDataOnly(TRUE);
+      $custom_calls = array(
+        'setReadDataOnly' => array(TRUE),
+      ) + $custom_calls;
 
       if (!empty($custom_calls)) {
         foreach ($custom_calls as $method => $args) {
