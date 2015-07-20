@@ -404,7 +404,7 @@ function phpexcel_import($path, $keyed_by_headers = TRUE, $keyed_by_worksheet = 
 
           $cells = $row->getCellIterator();
 
-          $cells->setIterateOnlyExistingCells(TRUE);
+          $cells->setIterateOnlyExistingCells(FALSE);
 
           foreach ($cells as $cell) {
             $value = $cell->getValue();
