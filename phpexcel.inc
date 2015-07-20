@@ -402,11 +402,11 @@ function phpexcel_import($path, $keyed_by_headers = TRUE, $keyed_by_worksheet = 
           }
           $k = 0;
 
-          phpexcel_invoke('import', 'row', $row, $xls_reader, $options);
-
           $cells = $row->getCellIterator();
 
           $cells->setIterateOnlyExistingCells(FALSE);
+
+          phpexcel_invoke('import', 'row', $row, $xls_reader, $options);
 
           foreach ($cells as $cell) {
             $value = $cell->getValue();
