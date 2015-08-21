@@ -271,6 +271,9 @@
 /**
  * Implements hook_phpexcel_export().
  *
+ * Allows modules to interact with the exporting of data. This hook is invoked
+ * at different stages of the export, represented by the $op parameter.
+ *
  * @see phpexcel_export()
  *
  * @param string $op
@@ -335,6 +338,9 @@ function hook_phpexcel_export($op, &$data, $phpexcel, $options, $column = NULL, 
 /**
  * Implements hook_phpexcel_import().
  *
+ * Allows modules to interact with the importing of data. This hook is invoked
+ * at different stages of the import, represented by the $op parameter.
+ *
  * @see phpexcel_import()
  *
  * @param string $op
@@ -396,3 +402,4 @@ function hook_phpexcel_import($op, &$data, $phpexcel, $options, $column = NULL, 
 /**
  * @} End of "addtogroup hooks".
  */
+

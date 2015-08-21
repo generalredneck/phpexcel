@@ -49,6 +49,8 @@ define('PHPEXCEL_SUCCESS', 10);
  *    PHPEXCEL_ERROR_NO_DATA, PHPEXCEL_ERROR_PATH_NOT_WRITABLE or
  *    PHPEXCEL_ERROR_LIBRARY_NOT_FOUND on error.
  *
+ * @see hook_phpexcel_export()
+ *
  * @ingroup phpexcel_api
  */
 function phpexcel_export($headers = array(), $data = array(), $path = '', $options = NULL) {
@@ -345,6 +347,8 @@ function _phpexcel_set_columns($xls, &$data, $headers = NULL, $options = array()
  * @return array|int
  *    The parsed data as an array on success, PHPEXCEL_ERROR_LIBRARY_NOT_FOUND
  *    or PHPEXCEL_ERROR_FILE_NOT_READABLE on error.
+ *
+ * @see hook_phpexcel_import()
  *
  * @ingroup phpexcel_api
  */
