@@ -88,6 +88,19 @@
  * - ignore_headers: a boolean indicating whether the headers array should be
  *   used, or simply ignored. If ignored, worksheet names will be computed
  *   based on the data parameter.
+ * - merge_cells: an array with sheets and cell ranges that need to be merged
+ *   in the end result. For example:
+ *   @code
+ *   array('merge_cells' => array(
+ *     'Worksheet 1' => array(
+ *       'A1:C1',
+ *       'D1:G1',
+ *     ),
+ *   ))
+ *   @endcode
+ *   Notice that for merging cells, contrary to the $header and $data
+ *   parameters, you MUST give at least 1 worksheet, be it an index or a valid
+ *   worksheet name.
  * - template: a path to an existing file, to be used as a template.
  * - format: The EXCEL format. Can be either 'xls', 'xlsx', 'csv', or 'ods'. By
  *   default, the extension of the file given as the target path will be used
