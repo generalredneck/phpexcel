@@ -61,7 +61,7 @@ function phpexcel_libraries_info() {
  */
 function phpexcel_get_library_version() {
   $library = libraries_load('PHPExcel');
-  $changelog_file = $library['library path'] . '/changelog.txt';
+  $changelog_file = $library['library path'] . DIRECTORY_SEPARATOR . 'changelog.txt';
 
   if (file_exists($changelog_file)) {
     $changelog = file_get_contents($changelog_file);
