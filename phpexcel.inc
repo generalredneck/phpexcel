@@ -133,7 +133,7 @@ function phpexcel_export($headers = array(), $data = array(), $path = '', $optio
   if (!empty($options['merge_cells'])) {
     foreach ($options['merge_cells'] as $sheet_name => $merge_cells_list) {
       foreach ($merge_cells_list as $merge_cells) {
-        $sheet = $xls->setActiveSheetIndexByName($sheet_name);
+        $sheet = $xls->setActiveSheetIndex($sheet_name);
         $style = array(
           'alignment' => array(
             'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
