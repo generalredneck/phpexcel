@@ -319,10 +319,9 @@
  * ), $filepath);
  *
  * if ($result === PHPEXCEL_SUCCESS) {
- *   // Exported successfully. Let's register the file with Drupal. We will use the
- *   // private file system for it (make sure it exists!) You could also simply
+ *   // Exported successfully. Let's register the file with Drupal. We simply
  *   // tell Drupal to copy the file over the existing one, by passing in
- *   // temporary://$filename. In that case, don't unlink it at the end.
+ *   // temporary://$filename.
  *   $file = file_save_data(
  *     file_get_contents($filepath),
  *     "temporary://$filename",
@@ -361,7 +360,7 @@
  * @section batch_export Export data in a batch
  *
  * It is possible to append data to existing files, allowing modules to export
- * Excel files in a batch operation. This requires a the preparation of an
+ * Excel files in a batch operation. This requires the preparation of an
  * Excel file before data starts to be exported. In the following example, the
  * file can be downloaded at the end via a status message and a link. For this
  * to work, we need a hook_file_download() implementation. This is not required,
@@ -464,6 +463,149 @@
  *   }
  * }
  * @endcode
+ *
+ * @section batch_import Import data in a batch
+ *
+ * When dealing with very large PHPExcel files, we sometimes want to import data
+ * in a batch instead of everything at once in order to save memory. We can
+ * achieve this using a custom PHPExcel_Reader_IReadFilter class. A filter can
+ * be used by PHPExcel to only read certain rows, which saves memory.
+ *
+ * @see batch
+ *
+ * First, provide the batch operation and finish callbacks:
+ *
+ * @code
+ * function mymodule_process($filepath, &$context) {
+ *   module_load_include('inc', 'phpexcel');
+ *
+ *   if (!isset($context['sandbox']['progress'])) {
+ *     $context['sandbox']['progress'] = 0;
+ *     // We have no idea how many lines we have to load. Provide some large
+ *     // number, and we'll adapt as we go along.
+ *     $context['sandbox']['max'] = 10000;
+ *   }
+ *
+ *   // We need to load the library before we can instantiate our
+ *   // ChunkReaderFilter class.
+ *   $library = libraries_load('PHPExcel');
+ *   if (empty($library['loaded'])) {
+ *     drupal_set_message(t("Couldn't load the PHPExcel library."), 'error');
+ *     $context['sandbox']['finished'] = 1;
+ *     $context['success'] = FALSE;
+ *     return;
+ *   }
+ *
+ *   $limit = 10;
+ *   // See our module's info file below.
+ *   $chunk_filter = new ChunkReadFilter();
+ *   $chunk_filter->setRows($context['sandbox']['progress'], $limit);
+ *   $data = phpexcel_import($filepath, TRUE, FALSE, array(
+ *     'setReadFilter' => array($chunk_filter),
+ *   ));
+ *
+ *   if (!is_array($data)) {
+ *     drupal_set_message(t("Something went wrong on pass !pass", array(
+ *       '!pass' => $context['sandbox']['progress'],
+ *     )), 'error');
+ *     $context['sandbox']['finished'] = 1;
+ *     $context['success'] = FALSE;
+ *     return;
+ *   }
+ *
+ *   // Get rid of the worksheet.
+ *   $data = $data[0];
+ *
+ *   $i = 0;
+ *   while($i < $limit) {
+ *     if (!empty($data[$i])) {
+ *       // Do something with the data, like creating a node...
+ *       $node = (object) array(
+ *         'type' => 'page',
+ *         'title' => $data[$i]['Header 1'],
+ *       );
+ *       node_save($node);
+ *       $context['results'][] = $node;
+ *       $context['sandbox']['progress']++;
+ *       $i++;
+ *     }
+ *     else {
+ *       // We have reached the end of our file. Finish now.
+ *       $context['sandbox']['finished'] = 1;
+ *       $context['success'] = TRUE;
+ *       return;
+ *     }
+ *   }
+ *
+ *   if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
+ *     $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
+ *   }
+ * }
+ *
+ * function mymodule_finished($success, $results, $operations) {
+ *   if ($success) {
+ *     // Here we do something meaningful with the results.
+ *     $message = t("!count items were processed.", array(
+ *       '!count' => count($results),
+ *     ));
+ *     $message .= theme('item_list', array('items' => array_map(function($node) {
+ *       return l($node->title, "node/{$node->nid}");
+ *     }, $results)));
+ *     drupal_set_message($message);
+ *   }
+ * }
+ * @endcode
+ *
+ * In our batch, we use a custom class called ChunkReadFilter. We must define
+ * it in its own file:
+ *
+ * @code
+ * <?php
+ * // Put this in a separate file, like src/ChunkReadFilter.php.
+ *
+ * class ChunkReadFilter implements PHPExcel_Reader_IReadFilter {
+ *   protected $start = 0;
+ *   protected $end = 0;
+ *
+ *   public function setRows($start, $chunk_size) {
+ *     $this->start = $start;
+ *     $this->end   = $start + $chunk_size;
+ *   }
+ *
+ *   public function readCell($column, $row, $worksheetName = '') {
+ *     // Only read the heading row, and the rows that are between
+ *     // $this->start and $this->end.
+ *     if (($row == 1) || ($row >= $this->start && $row < $this->end)) {
+ *       return TRUE;
+ *     }
+ *     return FALSE;
+ *   }
+ * }
+ * @endcode
+ *
+ * We need to register this file with Drupal's autoloader, which is done by
+ * adding a files[] directive to the module's .info file:
+ *
+ * @code
+ * ; mymodule.info
+ * name = My module
+ * core = 7.x
+ * files[] = src/ChunkReadFilter.php
+ * @endcode
+ *
+ * Now, we can set a batch operation like so:
+ *
+ * @code
+ * batch_set(array(
+ *   'operations' => array(
+ *     array('mymodule_process', array('/path/to/file.xls')),
+ *   ),
+ *   'finished' => 'mymodule_finished',
+ * ));
+ * @endcode
+ *
+ * This will import all the rows from the /path/to/file.xls Excel file, and
+ * create a node for each row.
  * @}
  */
 
