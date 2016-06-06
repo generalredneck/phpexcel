@@ -40,6 +40,7 @@ define('PHPEXCEL_SUCCESS', 10);
  *    - subject: The subject.
  *    - description: The description.
  *    - template: A path to a file to use as a template.
+ *    - merge_cells: Array with sheets and cell ranges for merge. Ex: [sheet][0]='A1:C1'.
  *    The options array will always be passed to all the hooks. If
  *    developers need specific information for their own hooks, they
  *    can add any data to this array.
@@ -127,6 +128,22 @@ function phpexcel_export($headers = array(), $data = array(), $path = '', $optio
   }
 
   _phpexcel_set_columns($xls, $data, empty($options['ignore_headers']) ? $headers : NULL, $options);
+
+  // Merge cells.
+  if (!empty($options['merge_cells'])) {
+    foreach ($options['merge_cells'] as $sheet_name => $merge_cells_list) {
+      foreach ($merge_cells_list as $merge_cells) {
+        $sheet = $xls->setActiveSheetIndexByName($sheet_name);
+        $style = array(
+          'alignment' => array(
+            'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+          )
+        );
+        $sheet->getStyle($merge_cells)->applyFromArray($style);
+        $xls->getActiveSheet()->mergeCells($merge_cells);
+      }
+    }
+  }
 
   $format = isset($options['format']) ? drupal_strtolower($options['format']) : @end(explode('.', $path));
 
