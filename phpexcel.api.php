@@ -560,7 +560,6 @@
  * it in its own file:
  *
  * @code
- * <?php
  * // Put this in a separate file, like src/ChunkReadFilter.php.
  *
  * class ChunkReadFilter implements PHPExcel_Reader_IReadFilter {
