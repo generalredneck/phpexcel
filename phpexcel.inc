@@ -40,7 +40,8 @@ define('PHPEXCEL_SUCCESS', 10);
  *    - subject: The subject.
  *    - description: The description.
  *    - template: A path to a file to use as a template.
- *    - merge_cells: Array with sheets and cell ranges for merge. Ex: [sheet][0]='A1:C1'.
+ *    - merge_cells: Array with sheets and cell ranges for merge. For example:
+ *      [sheet][0]='A1:C1'.
  *    The options array will always be passed to all the hooks. If
  *    developers need specific information for their own hooks, they
  *    can add any data to this array.
