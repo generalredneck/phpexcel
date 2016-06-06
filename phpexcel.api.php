@@ -372,7 +372,7 @@
  * First, provide the batch operation and finish callbacks:
  *
  * @code
- * function mymodule_process(&$context) {
+ * function mymodule_batch_process(&$context) {
  *   module_load_include('inc', 'phpexcel');
  *
  *   if (!isset($context['sandbox']['progress'])) {
@@ -429,7 +429,7 @@
  *   }
  * }
  *
- * function mymodule_finished($success, $results, $operations) {
+ * function mymodule_batch_finished($success, $results, $operations) {
  *   if ($success) {
  *     $wrapper = file_stream_wrapper_get_instance_by_uri($results);
  *     drupal_set_message(t("Download it here: !link", array(
@@ -444,9 +444,9 @@
  * @code
  * batch_set(array(
  *   'operations' => array(
- *     array('mymodule_process', array()),
+ *     array('mymodule_batch_process', array()),
  *   ),
- *   'finished' => 'mymodule_finished',
+ *   'finished' => 'mymodule_batch_finished',
  * ));
  * @endcode
  *
@@ -476,7 +476,7 @@
  * First, provide the batch operation and finish callbacks:
  *
  * @code
- * function mymodule_process($filepath, &$context) {
+ * function mymodule_batch_process($filepath, &$context) {
  *   module_load_include('inc', 'phpexcel');
  *
  *   if (!isset($context['sandbox']['progress'])) {
@@ -542,7 +542,7 @@
  *   }
  * }
  *
- * function mymodule_finished($success, $results, $operations) {
+ * function mymodule_batch_finished($success, $results, $operations) {
  *   if ($success) {
  *     // Here we do something meaningful with the results.
  *     $message = t("!count items were processed.", array(
@@ -598,9 +598,9 @@
  * @code
  * batch_set(array(
  *   'operations' => array(
- *     array('mymodule_process', array('/path/to/file.xls')),
+ *     array('mymodule_batch_process', array('/path/to/file.xls')),
  *   ),
- *   'finished' => 'mymodule_finished',
+ *   'finished' => 'mymodule_batch_finished',
  * ));
  * @endcode
  *
