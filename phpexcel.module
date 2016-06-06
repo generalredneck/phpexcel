@@ -105,7 +105,12 @@ function phpexcel_settings_form() {
     '#type' => 'fieldset',
     '#title' => t("PHPTemp options"),
     '#collapsible' => TRUE,
-    '#collapsed' => variable_get('phpexcel_cache_mechanism') != 'cache_to_phpTemp',
+    '#collapsed' => FALSE,
+    '#states' => array(
+      'visible' => array(
+        ':input[name="phpexcel_cache_mechanism"]' => array('value' => 'cache_to_phpTemp'),
+      ),
+    ),
   );
   $form['phptemp']['phpexcel_phptemp_limit'] = array(
     '#title' => t("PHPTemp memory cache size"),
@@ -119,7 +124,12 @@ function phpexcel_settings_form() {
     '#type' => 'fieldset',
     '#title' => t("APC options"),
     '#collapsible' => TRUE,
-    '#collapsed' => variable_get('phpexcel_cache_mechanism') != 'cache_to_apc',
+    '#collapsed' => FALSE,
+    '#states' => array(
+      'visible' => array(
+        ':input[name="phpexcel_cache_mechanism"]' => array('value' => 'cache_to_apc'),
+      ),
+    ),
   );
   $form['apc']['phpexcel_apc_cachetime'] = array(
     '#title' => t("APC cache timeout"),
@@ -133,7 +143,12 @@ function phpexcel_settings_form() {
     '#type' => 'fieldset',
     '#title' => t("Memcache options"),
     '#collapsible' => TRUE,
-    '#collapsed' => variable_get('phpexcel_cache_mechanism') != 'cache_to_memcache',
+    '#collapsed' => FALSE,
+    '#states' => array(
+      'visible' => array(
+        ':input[name="phpexcel_cache_mechanism"]' => array('value' => 'cache_to_memcache'),
+      ),
+    ),
   );
   $form['memcache']['phpexcel_memcache_host'] = array(
     '#title' => t("Memcache server"),
