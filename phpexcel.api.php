@@ -283,6 +283,13 @@
  * with your own modules and sites. For the basics, see
  * @link phpexcel_api the PHPExcel API topic @endlink.
  *
+ * @section toc Table of contents
+ *
+ * - @ref download_result Download the exported result
+ * - @ref batch_export Export data in a batch
+ * - @ref batch_import Import data in a batch
+ * - TODO: adding styles to a cell
+ *
  * @section download_result Download the exported result
  *
  * It is possible that an exported result must be downloaded straight away,
