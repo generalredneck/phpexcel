@@ -277,6 +277,197 @@
  */
 
 /**
+ * @defgroup phpexcel_cookbook PHPExcel cookbook
+ * @{
+ * This section provides several real-life examples of using the PHPExcel module
+ * with your own modules and sites. For the basics, see
+ * @link phpexcel_api the PHPExcel API topic @endlink.
+ *
+ * @section download_result Download the exported result
+ *
+ * It is possible that an exported result must be downloaded straight away,
+ * after which the exported file should be deleted. One way to achieve this is
+ * using Drupal's "managed files". We can register files with Drupal, and tell
+ * it to mark them as temporary. These temporary files will be garbage collected
+ * at regular intervals, on cron runs. The following example shows the code
+ * that exports the data to an Excel file, and then registers it with Drupal as
+ * a temporary file, and triggers the file transfer. Notice that using the
+ * built-in file_download_headers() function requires a hook_file_download()
+ * implementation.
+ *
+ * @see file_download_headers()
+ * @see file_transfer()
+ * @see hook_file_download()
+ *
+ * This code could be the content of a page callback, for example:
+ *
+ * @code
+ * module_load_include('inc', 'phpexcel');
+ *
+ * // Prepare the file path. The PHPExcel library doesn't handle PHP stream
+ * // wrappers, so we need the real path.
+ * $wrapper = file_stream_wrapper_get_instance_by_uri('temporary://');
+ * // Generate a file name. If it's unique, it's less likely to conflict with an
+ * // existing file. You could also put up some more checks on this, if it's likely
+ * // to conflict (like, when you have many export/download requests).
+ * $filename = 'mymodule--download-' . uniqid() . '.xls';
+ * $filepath = $wrapper->realpath() . '/' . $filename;
+ * // Export, and store to file.
+ * $result = phpexcel_export(array('Header 1', 'Header 2'), array(
+ *   array('A1', 'B1'),
+ *   array('A2', 'B2'),
+ * ), $filepath);
+ *
+ * if ($result === PHPEXCEL_SUCCESS) {
+ *   // Exported successfully. Let's register the file with Drupal. We will use the
+ *   // private file system for it (make sure it exists!) You could also simply
+ *   // tell Drupal to copy the file over the existing one, by passing in
+ *   // temporary://$filename. In that case, don't unlink it at the end.
+ *   $file = file_save_data(
+ *     file_get_contents($filepath),
+ *     "temporary://$filename",
+ *     FILE_EXISTS_REPLACE
+ *   );
+ *
+ *   // By default, the file is stored as a permanent file. Let's make it
+ *   // temporary, so Drupal will remove it (in 6 hours, if your cron is set up
+ *   // correctly).
+ *   $file->status = 0;
+ *   file_save($file);
+ *
+ *   // Start downloading. This requires a hook_file_download() implementation!
+ *   $headers = file_download_headers($file->uri);
+ *   file_transfer($file->uri, $headers);
+ * }
+ * else {
+ *   // Error.
+ * }
+ * @endcode
+ *
+ * To complement this, we need a hook_file_download() implementation. Add this
+ * to your module's .module file:
+ *
+ * @code
+ * function mymodule_file_download($uri) {
+ *   if (preg_match('/mymodule--download-(.+?)\.xls$/', $uri)) {
+ *     return array(
+ *       'Content-type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+ *       'Content-Disposition' => 'attachment; filename="export.xls"',
+ *     );
+ *   }
+ * }
+ * @endcode
+ *
+ * @section batch_export Export data in a batch
+ *
+ * It is possible to append data to existing files, allowing modules to export
+ * Excel files in a batch operation. This requires a the preparation of an
+ * Excel file before data starts to be exported. In the following example, the
+ * file can be downloaded at the end via a status message and a link. For this
+ * to work, we need a hook_file_download() implementation. This is not required,
+ * however, if you simply need to treat the file in a different way after the
+ * export.
+ *
+ * @see batch
+ *
+ * First, provide the batch operation and finish callbacks:
+ *
+ * @code
+ * function mymodule_process(&$context) {
+ *   module_load_include('inc', 'phpexcel');
+ *
+ *   if (!isset($context['sandbox']['progress'])) {
+ *     // Store the file in the temporary directory.
+ *     $wrapper = file_stream_wrapper_get_instance_by_uri('temporary://');
+ *     $context['sandbox']['filename'] = 'mymodule--download-' . uniqid() . '.xls';
+ *     $context['sandbox']['file'] = $wrapper->realpath() . '/' . $context['sandbox']['filename'];
+ *
+ *     // Prepare the Excel file.
+ *     $result = phpexcel_export(array('Header 1', 'Header 2'), array(
+ *       // Provide some empty data. We will append data later on.
+ *       array(),
+ *     ), $context['sandbox']['file']);
+ *
+ *     if ($result !== PHPEXCEL_SUCCESS) {
+ *       drupal_set_message("Something went wrong", 'error');
+ *       $context['sandbox']['finished'] = 1;
+ *       $context['success'] = FALSE;
+ *       return;
+ *     }
+ *
+ *     $context['sandbox']['progress'] = 0;
+ *     $context['sandbox']['max'] = 40;
+ *     // Trick to pass the filepath to the finished callback.
+ *     $context['results'] = "temporary://{$context['sandbox']['filename']}";
+ *   }
+ *
+ *   $limit = 10;
+ *   while($limit) {
+ *     $result = phpexcel_export(array('Header 1', 'Header 2'), array(
+ *       // Append some data to the file.
+ *       array('Some value', 'Some other value'),
+ *     ), $context['sandbox']['file'], array(
+ *       // Use our previously prepared file as a "template", which means we
+ *       // will append data to it, instead of starting from scratch again.
+ *       'template' => $context['sandbox']['file'],
+ *     ));
+ *
+ *     if ($result !== PHPEXCEL_SUCCESS) {
+ *       drupal_set_message(t("Something went wrong on pass !pass", array(
+ *         '!pass' => $context['sandbox']['progress'],
+ *       )), 'error');
+ *       $context['sandbox']['finished'] = 1;
+ *       $context['success'] = FALSE;
+ *       return;
+ *     }
+ *
+ *     $context['sandbox']['progress']++;
+ *     $limit--;
+ *   }
+ *
+ *   if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
+ *     $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
+ *   }
+ * }
+ *
+ * function mymodule_finished($success, $results, $operations) {
+ *   if ($success) {
+ *     $wrapper = file_stream_wrapper_get_instance_by_uri($results);
+ *     drupal_set_message(t("Download it here: !link", array(
+ *       '!link' => l($results, $wrapper->getExternalUrl()),
+ *     )), 'status', FALSE);
+ *   }
+ * }
+ * @endcode
+ *
+ * Now, we can set a batch operation like so:
+ *
+ * @code
+ * batch_set(array(
+ *   'operations' => array(
+ *     array('mymodule_process', array()),
+ *   ),
+ *   'finished' => 'mymodule_finished',
+ * ));
+ * @endcode
+ *
+ * Again, for this example to work, we need a hook_file_download()
+ * implementation:
+ *
+ * @code
+ * function mymodule_file_download($uri) {
+ *   if (preg_match('/mymodule--download-(.+?)\.xls$/', $uri)) {
+ *     return array(
+ *       'Content-type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+ *       'Content-Disposition' => 'attachment; filename="export.xls"',
+ *     );
+ *   }
+ * }
+ * @endcode
+ * @}
+ */
+
+/**
  * @addtogroup hooks
  * @{
  */
