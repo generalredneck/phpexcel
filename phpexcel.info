@@ -5,3 +5,4 @@ dependencies[] = libraries
 
 files[] = tests/phpexcel.test
 
+configure = admin/config/system/phpexcel
