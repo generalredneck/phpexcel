@@ -42,6 +42,7 @@ define('PHPEXCEL_SUCCESS', 10);
  *    - template: A path to a file to use as a template.
  *    - merge_cells: Array with sheets and cell ranges for merge. For example:
  *      [sheet][0]='A1:C1'.
+ *    - append: whether to append to the existing file. Defaults to TRUE.
  *    The options array will always be passed to all the hooks. If
  *    developers need specific information for their own hooks, they
  *    can add any data to this array.
@@ -107,8 +108,12 @@ function phpexcel_export($headers = array(), $data = array(), $path = '', $optio
 
   PHPExcel_Settings::setCacheStorageMethod($cache_method, $cache_settings);
 
-  // First, see if the file already exists
-  if (file_exists($path)) {
+  if (!isset($options['append'])) {
+    $options['append'] = TRUE;
+  }
+
+  // If appending files enabled, see if the file already exists
+  if ($options['append'] && file_exists($path)) {
     $xls = PHPExcel_IOFactory::load($path);
   }
   elseif (!empty($options['template'])) {

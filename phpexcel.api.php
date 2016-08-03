@@ -40,14 +40,24 @@
  * ), 'path/to/file.xls', array('description' => "Some description"));
  * @endcode
  *
- * If the target file already exists, data will be appended to it, instead of
- * overwriting its content. It is also possible to use an existing file as a
- * template. This is done by specifying the "template" option:
+ * If the target file already exists and the option "append" is not explicitly
+ * set to FALSE, data will be appended to it, instead of overwriting its
+ * content. It is also possible to use an existing file as a template. This is
+ * done by specifying the "template" option:
  * @code
  * phpexcel_export(array('Header 1', 'Header 2'), array(
  *   array('A1', 'B1'),
  *   array('A2', 'B2'),
  * ), 'path/to/file.xls', array('template' => 'path/to/template.xls'));
+ * @endcode
+ *
+ * If you don't want that the data to be appended even if the target file
+ * already exists, you can set option "append" to FALSE:
+ * @code
+ * phpexcel_export(array('Header 1', 'Header 2'), array(
+ *   array('A1', 'B1'),
+ *   array('A2', 'B2'),
+ * ), 'path/to/file.xls', array('append' => FALSE));
  * @endcode
  *
  * It is possible to export data to multiple worksheets. In that case, the
