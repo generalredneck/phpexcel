@@ -65,7 +65,6 @@ function phpexcel_get_library_version() {
 
   if (file_exists($changelog_file)) {
     $changelog = file_get_contents($changelog_file);
-    $match;
 
     if (preg_match('/\d{4}-\d{2}-\d{2}\s+\(v([0-9\.]+)/', $changelog, $match)) {
       return $match[1];
