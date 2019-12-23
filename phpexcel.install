@@ -26,10 +26,9 @@ function phpexcel_uninstall() {
  */
 function phpexcel_requirements($phase) {
   if ($phase == 'runtime') {
-    $library = libraries_load('PhpSpreadsheet');
     $t = get_t();
 
-    if (empty($library['loaded'])) {
+    if (phpexcel_load_library() === FALSE) {
       return array(
         'phpexcel' => array(
           'title' => $t("PhpSpreadsheet"),

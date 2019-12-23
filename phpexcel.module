@@ -207,3 +207,18 @@ function phpexcel_settings_form_validate($form, $form_state) {
       break;
   }
 }
+
+function phpexcel_load_library() {
+  if (!class_exists('\PhpOffice\PhpSpreadsheet\Spreadsheet', TRUE)) {
+    if (!module_exists('libraries')) {
+      watchdog('phpexcel', "Either enable composer_autloader and require phpoffice\phpspreadsheet or enable libraries and follow instructions in README.txt", array(), WATCHDOG_ERROR);
+      return FALSE;
+    }
+    $library = libraries_load('PhpSpreadsheet');
+    if ($library['loaded'] === FALSE) {
+      watchdog('phpexcel', "PhpSpreadsheet was not found. Follow instructions in README.txt", array(), WATCHDOG_ERROR);
+      return FALSE;
+    }
+  }
+  return TRUE;
+}
