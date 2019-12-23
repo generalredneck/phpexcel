@@ -26,15 +26,15 @@ function phpexcel_uninstall() {
  */
 function phpexcel_requirements($phase) {
   if ($phase == 'runtime') {
-    $library = libraries_load('PHPExcel');
+    $library = libraries_load('PhpSpreadsheet');
     $t = get_t();
 
     if (empty($library['loaded'])) {
       return array(
         'phpexcel' => array(
-          'title' => $t("PHPExcel"),
-          'value' => '>1.7.8',
-          'description' => $t("In order to use PHPExcel, you must first download the entire library (1.8.*) at !link and put it under sites/*/libraries/PHPExcel/ (so you should have sites/*/libraries/PHPExcel/Classes/PHPExcel.php). Make sure to include the changelog.txt file as well (sites/*/libraries/PHPExcel/changelog.txt), as Library API requires this file for loading the classes.", array('!link' => '<a href="https://github.com/PHPOffice/PHPExcel">Github</a>')),
+          'title' => $t("PhpSpreadsheet"),
+          'value' => '>1.0.0',
+          'description' => $t("In order to use PHPExcel, you must first download the entire PhpSpreadsheet library at !link and put it under sites/*/libraries/PhpSpreadsheet/ and install dependencies using Composer (so you should have sites/*/libraries/PhpSpreadsheet/vendor/autoload.php).", array('!link' => '<a href="https://github.com/PHPOffice/PhpSpreadsheet">Github</a>')),
           'severity' => REQUIREMENT_ERROR,
         ),
       );
@@ -42,8 +42,8 @@ function phpexcel_requirements($phase) {
     else {
       return array(
         'phpexcel' => array(
-          'title' => $t("PHPExcel"),
-          'value' => $t("PHPExcel @version", array('@version' => $library['version'])),
+          'title' => $t("PhpSpreadsheet"),
+          'value' => $t("PhpSpreadsheet @version", array('@version' => $library['version'])),
           'severity' => REQUIREMENT_OK,
         ),
       );

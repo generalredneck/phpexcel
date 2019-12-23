@@ -88,10 +88,10 @@ function phpexcel_export($headers = array(), $data = array(), $path = '', $optio
     return PHPEXCEL_ERROR_PATH_NOT_WRITABLE;
   }
 
-  $library = libraries_load('PHPExcel');
+  $library = libraries_load('PhpSpreadsheet');
 
   if (empty($library['loaded'])) {
-    watchdog('phpexcel', "Couldn't find the PHPExcel library. Excel export aborted.", array(), WATCHDOG_ERROR);
+    watchdog('phpexcel', "Couldn't find the PhpSpreadsheet library. Excel export aborted.", array(), WATCHDOG_ERROR);
 
     return PHPEXCEL_ERROR_LIBRARY_NOT_FOUND;
   }
@@ -99,14 +99,12 @@ function phpexcel_export($headers = array(), $data = array(), $path = '', $optio
   $path = phpexcel_munge_filename($path);
 
   // Determine caching method.
-  list($cache_method, $cache_settings) = _phpexcel_get_cache_settings();
+  $cache_method = _phpexcel_get_cache_settings();
 
-  // Is it available ? If not, return an error.
-  if (empty($cache_method)) {
-    return PHPEXCEL_CACHING_METHOD_UNAVAILABLE;
+  // Enable if exist
+  if (!empty($cache_method)) {
+    \PhpOffice\PhpSpreadsheet\Settings::setCache($cache_method);
   }
-
-  PHPExcel_Settings::setCacheStorageMethod($cache_method, $cache_settings);
 
   if (!isset($options['append'])) {
     $options['append'] = TRUE;
@@ -114,16 +112,16 @@ function phpexcel_export($headers = array(), $data = array(), $path = '', $optio
 
   // If appending files enabled, see if the file already exists
   if ($options['append'] && file_exists($path)) {
-    $xls = PHPExcel_IOFactory::load($path);
+    $xls = \PhpOffice\PhpSpreadsheet\IOFactory::load($path);
   }
   elseif (!empty($options['template'])) {
     // Must we render from a template file ?
-    $xls_reader = PHPExcel_IOFactory::createReaderForFile($options['template']);
+    $xls_reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReaderForFile($options['template']);
 
     $xls = $xls_reader->load($options['template']);
   }
   else {
-    $xls = new PHPExcel();
+    $xls = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
   }
 
   _phpexcel_set_properties($xls->getProperties(), $options);
@@ -142,7 +140,7 @@ function phpexcel_export($headers = array(), $data = array(), $path = '', $optio
         $sheet = $xls->setActiveSheetIndex($sheet_name);
         $style = array(
           'alignment' => array(
-            'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+            'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
           )
         );
         $sheet->getStyle($merge_cells)->applyFromArray($style);
@@ -155,16 +153,16 @@ function phpexcel_export($headers = array(), $data = array(), $path = '', $optio
 
   switch ($format) {
     case 'xlsx':
-      $writer = new PHPExcel_Writer_Excel2007($xls);
+      $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($xls);
       break;
     case 'csv':
-      $writer = new PHPExcel_Writer_CSV($xls);
+      $writer = new \PhpOffice\PhpSpreadsheet\Writer\Csv($xls);
       break;
     case 'ods':
-      $writer = new PHPExcel_Writer_OpenDocument($xls);
+      $writer = new \PhpOffice\PhpSpreadsheet\Writer\Ods($xls);
       break;
     default:
-      $writer = new PHPExcel_Writer_Excel5($xls);
+      $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xls($xls);
   }
 
   $writer->save($path);
@@ -215,7 +213,7 @@ function _phpexcel_set_properties($properties, $options) {
     $properties->setCreator($options['creator']);
   }
   else {
-    $properties->setCreator("PHPExcel");
+    $properties->setCreator("\PhpOffice\PhpSpreadsheet\Spreadsheet");
   }
 
   if (isset($options['title'])) {
@@ -258,8 +256,8 @@ function _phpexcel_set_headers($xls, &$headers, $options) {
         $sheet = $xls->setActiveSheetIndex($sheet_id);
       }
       else {
-        // PHPExcel always creates one sheet.
-        $sheet = $xls->getSheet();
+        // PhpSpreadsheet always creates one sheet.
+        $sheet = $xls->getSheet(0);
       }
 
       $sheet->setTitle($sheet_name);
@@ -272,7 +270,7 @@ function _phpexcel_set_headers($xls, &$headers, $options) {
 
       phpexcel_invoke('export', 'pre cell', $value, $sheet, $options, $i, 1);
 
-      $sheet->setCellValueByColumnAndRow($i, 1, $value);
+      $sheet->setCellValueByColumnAndRow($i + 1, 1, $value);
 
       phpexcel_invoke('export', 'post cell', $value, $sheet, $options, $i, 1);
     }
@@ -311,8 +309,8 @@ function _phpexcel_set_columns($xls, &$data, $headers = NULL, $options = array()
           $sheet = $xls->setActiveSheetIndex($sheet_id);
         }
         else {
-          // PHPExcel always creates one sheet.
-          $sheet = $xls->getSheet();
+          // PhpSpreadsheet always creates one sheet.
+          $sheet = $xls->getSheet(0);
         }
 
         $sheet->setTitle($sheet_name);
@@ -334,10 +332,10 @@ function _phpexcel_set_columns($xls, &$data, $headers = NULL, $options = array()
         $value = isset($sheet_data[$i][$j]) ? $sheet_data[$i][$j] : '';
 
         // We must offset the row count (by 2 if the first row is used by the
-        // headers, because PHPExcel starts the count at 1, not 0).
+        // headers, because PhpSpreadsheet starts the count at 1, not 0).
         phpexcel_invoke('export', 'pre cell', $value, $sheet, $options, $j, $i + $offset);
 
-        $sheet->setCellValueByColumnAndRow($j, $i + $offset, $value);
+        $sheet->setCellValueByColumnAndRow($j + 1, $i + $offset, $value);
 
         phpexcel_invoke('export', 'post cell', $value, $sheet, $options, $j, $i + $offset);
       }
@@ -363,7 +361,7 @@ function _phpexcel_set_columns($xls, &$data, $headers = NULL, $options = array()
  *    If TRUE, will key the data array with the worksheet names. Otherwise, it
  *    will use a numerical key.
  * @param array $custom_calls = NULL
- *    An associative array of methods and arguments to call on the PHPExcel
+ *    An associative array of methods and arguments to call on the PhpSpreadsheet
  *    Reader object. For example, if you wish to load only a specific worksheet
  *    to save time, you could use:
  *    @code
@@ -381,20 +379,18 @@ function _phpexcel_set_columns($xls, &$data, $headers = NULL, $options = array()
  */
 function phpexcel_import($path, $keyed_by_headers = TRUE, $keyed_by_worksheet = FALSE, $custom_calls = array()) {
   if (is_readable($path)) {
-    $library = libraries_load('PHPExcel');
+    $library = libraries_load('PhpSpreadsheet');
 
     if (!empty($library['loaded'])) {
       // Determine caching method.
-      list($cache_method, $cache_settings) = _phpexcel_get_cache_settings();
+      $cache_method = _phpexcel_get_cache_settings();
 
-      // Is it available ? If not, return an error.
-      if (empty($cache_method)) {
-        return PHPEXCEL_CACHING_METHOD_UNAVAILABLE;
-      }
+			// Enable if exist
+			if (!empty($cache_method)) {
+				\PhpOffice\PhpSpreadsheet\Settings::setCache($cache_method);
+			}
 
-      PHPExcel_Settings::setCacheStorageMethod($cache_method, $cache_settings);
-
-      $xls_reader = PHPExcel_IOFactory::createReaderForFile($path);
+      $xls_reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReaderForFile($path);
 
       $custom_calls = array(
         'setReadDataOnly' => array(TRUE),
@@ -484,7 +480,7 @@ function phpexcel_import($path, $keyed_by_headers = TRUE, $keyed_by_worksheet = 
             else {
               $col_index = $k;
               if ($cells->getIterateOnlyExistingCells()) {
-                $col_index = PHPExcel_Cell::columnIndexFromString($cell->getColumn()) - 1;
+                $col_index = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($cell->getColumn()) - 1;
               }
 
               phpexcel_invoke(
@@ -528,7 +524,7 @@ function phpexcel_import($path, $keyed_by_headers = TRUE, $keyed_by_worksheet = 
       return $data;
     }
     else {
-      watchdog('phpexcel', "Couldn't find the PHPExcel library. Excel import aborted.", array(), WATCHDOG_ERROR);
+      watchdog('phpexcel', "Couldn't find the PhpSpreadsheet library. Excel import aborted.", array(), WATCHDOG_ERROR);
 
       return PHPEXCEL_ERROR_LIBRARY_NOT_FOUND;
     }
@@ -577,38 +573,38 @@ function phpexcel_munge_filename($path) {
  * Determine the cache settings.
  *
  * Based on the site configuration, return the correct cache settings and method
- * to be used by PHPExcel.
+ * to be used by \PhpOffice\PhpSpreadsheet\Spreadsheet.
  *
  * @return array
  *    The first key is the caching method, the second the settings.
  */
 function _phpexcel_get_cache_settings() {
-  $cache_settings = array();
+	return NULL;
   switch (variable_get('phpexcel_cache_mechanism')) {
     case 'cache_in_memory_serialized':
-      $cache_method = PHPExcel_CachedObjectStorageFactory::cache_in_memory_serialized;
+      $cache_method = \PhpOffice\PhpSpreadsheet\Collection\CellsFactory::cache_in_memory_serialized;
       break;
 
     case 'cache_in_memory_gzip':
-      $cache_method = PHPExcel_CachedObjectStorageFactory::cache_in_memory_gzip;
+      $cache_method = \PhpOffice\PhpSpreadsheet\Collection\CellsFactory::cache_in_memory_gzip;
       break;
 
     case 'cache_to_phpTemp':
-      $cache_method = PHPExcel_CachedObjectStorageFactory::cache_to_phpTemp;
+      $cache_method = \PhpOffice\PhpSpreadsheet\Collection\CellsFactory::cache_to_phpTemp;
       $cache_settings = array(
         'memoryCacheSize' => variable_get('phpexcel_phptemp_limit', 1) . 'MB'
       );
       break;
 
     case 'cache_to_apc':
-      $cache_method = PHPExcel_CachedObjectStorageFactory::cache_to_apc;
+      $cache_method = \PhpOffice\PhpSpreadsheet\Collection\CellsFactory::cache_to_apc;
       $cache_settings = array(
         'cacheTime' => variable_get('phpexcel_apc_cachetime', '600')
       );
       break;
 
     case 'cache_to_memcache':
-      $cache_method = PHPExcel_CachedObjectStorageFactory::cache_to_memcache;
+      $cache_method = \PhpOffice\PhpSpreadsheet\Collection\CellsFactory::cache_to_memcache;
       $cache_settings = array(
         'memcacheServer' => variable_get('phpexcel_memcache_host', 'localhost'),
         'memcachePort' => variable_get('phpexcel_memcache_port', '11211'),
@@ -617,13 +613,13 @@ function _phpexcel_get_cache_settings() {
       break;
 
     case 'cache_to_sqlite3':
-      $cache_method = PHPExcel_CachedObjectStorageFactory::cache_to_sqlite3;
+      $cache_method = \PhpOffice\PhpSpreadsheet\Collection\CellsFactory::cache_to_sqlite3;
       break;
 
     default:
-      $cache_method = PHPExcel_CachedObjectStorageFactory::cache_in_memory;
+      $cache_method = \PhpOffice\PhpSpreadsheet\Collection\CellsFactory::cache_in_memory;
       break;
   }
 
-  return array($cache_method, $cache_settings);
+  return $cache_method;
 }
